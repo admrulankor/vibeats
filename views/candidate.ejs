@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= title %></title>
+    <link rel="stylesheet" href="/styles.css" />
+    <link rel="stylesheet" href="/style.css" />
+    <script defer src="/candidate.js"></script>
+  </head>
+  <body class="min-h-screen bg-(--color-bg) text-(--color-text) antialiased" data-candidate-id="<%= candidateId %>">
+    <header class="mx-auto max-w-5xl px-6 py-10">
+      <a href="/" class="text-sm text-(--color-accent)">← Back to candidate directory</a>
+      <h1 id="candidate-name" class="mt-2 text-3xl font-semibold tracking-tight">Candidate</h1>
+      <p id="candidate-role" class="mt-2 text-sm text-(--color-muted)">Loading...</p>
+    </header>
+
+    <main class="mx-auto max-w-5xl px-6 pb-12">
+      <section class="rounded-2xl border border-(--color-border) bg-white p-5 shadow-sm">
+        <div class="details-actions">
+          <p id="extraction-status" class="text-sm text-(--color-muted)">Extraction status: idle</p>
+          <div class="details-buttons">
+            <button id="extract-button" class="details-button" type="button">Extract from CV PDF</button>
+            <a id="cv-link" class="details-link" href="#" target="_blank" rel="noopener noreferrer">Browse CV PDF</a>
+          </div>
+        </div>
+        <p id="details-error" class="hidden rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"></p>
+      </section>
+
+      <section class="mt-6 details-layout">
+        <article class="rounded-2xl border border-(--color-border) bg-white p-5 shadow-sm">
+          <h2 class="text-sm font-medium uppercase tracking-wide text-(--color-muted)">Candidate Details</h2>
+          <div class="details-form mt-4">
+            <label>
+              <span>Email</span>
+              <input id="profile-email" type="email" class="details-input" />
+            </label>
+            <label>
+              <span>Phone</span>
+              <input id="profile-phone" type="text" class="details-input" />
+            </label>
+            <label>
+              <span>Location</span>
+              <input id="profile-location" type="text" class="details-input" />
+            </label>
+            <label>
+              <span>Summary</span>
+              <textarea id="profile-summary" class="details-input details-textarea" rows="4"></textarea>
+            </label>
+          </div>
+        </article>
+
+        <article class="rounded-2xl border border-(--color-border) bg-white p-5 shadow-sm">
+          <h2 class="text-sm font-medium uppercase tracking-wide text-(--color-muted)">Skills</h2>
+          <label class="mt-4 block">
+            <span class="block text-xs font-medium text-(--color-muted)">Comma separated skills</span>
+            <input id="skills-input" type="text" class="details-input mt-2" placeholder="JavaScript, TypeScript, SQL" />
+          </label>
+          <ul id="skills-list" class="mt-4 skills-list"></ul>
+        </article>
+      </section>
+
+      <section class="mt-6 details-layout">
+        <article class="rounded-2xl border border-(--color-border) bg-white p-5 shadow-sm">
+          <h2 class="text-sm font-medium uppercase tracking-wide text-(--color-muted)">Experience (JSON)</h2>
+          <textarea id="experience-json" class="details-input details-json mt-4" rows="10"></textarea>
+        </article>
+
+        <article class="rounded-2xl border border-(--color-border) bg-white p-5 shadow-sm">
+          <h2 class="text-sm font-medium uppercase tracking-wide text-(--color-muted)">Education (JSON)</h2>
+          <textarea id="education-json" class="details-input details-json mt-4" rows="10"></textarea>
+        </article>
+      </section>
+
+      <section class="mt-6 details-layout">
+        <article class="rounded-2xl border border-(--color-border) bg-white p-5 shadow-sm">
+          <h2 class="text-sm font-medium uppercase tracking-wide text-(--color-muted)">Works (JSON)</h2>
+          <textarea id="works-json" class="details-input details-json mt-4" rows="10"></textarea>
+        </article>
+
+        <article class="rounded-2xl border border-(--color-border) bg-white p-5 shadow-sm">
+          <h2 class="text-sm font-medium uppercase tracking-wide text-(--color-muted)">Awards (JSON)</h2>
+          <textarea id="awards-json" class="details-input details-json mt-4" rows="10"></textarea>
+        </article>
+      </section>
+
+      <section class="mt-6">
+        <button id="save-button" class="details-button" type="button">Save Extracted Data</button>
+      </section>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= title %></title>
+    <link rel="stylesheet" href="/styles.css" />
+    <link rel="stylesheet" href="/style.css" />
+    <script defer src="/new-applicant.js"></script>
+  </head>
+  <body class="min-h-screen bg-(--color-bg) text-(--color-text) antialiased">
+    <header class="mx-auto max-w-5xl px-6 py-10">
+      <a href="/" class="text-sm text-(--color-accent)">← Back to candidate directory</a>
+      <h1 class="mt-2 text-3xl font-semibold tracking-tight">Add New Applicant</h1>
+      <p class="mt-2 text-sm text-(--color-muted)"><%= companyName %> · Upload and scan CV</p>
+    </header>
+
+    <main class="mx-auto max-w-5xl px-6 pb-12">
+      <section class="rounded-2xl border border-(--color-border) bg-white p-5 shadow-sm">
+        <form id="add-applicant-form" class="grid gap-3 sm:grid-cols-2" enctype="multipart/form-data">
+          <label class="space-y-1 sm:col-span-2">
+            <span class="block text-xs font-medium text-(--color-muted)">CV PDF</span>
+            <input
+              id="cv-file-input"
+              name="cv"
+              type="file"
+              accept="application/pdf,.pdf"
+              required
+              class="w-full rounded-xl border border-(--color-border) bg-white px-3 py-2 text-sm outline-none transition focus:border-(--color-accent) focus:ring-2 focus:ring-(--color-accent-soft)"
+            />
+          </label>
+
+          <label class="space-y-1">
+            <span class="block text-xs font-medium text-(--color-muted)">Role (optional)</span>
+            <input
+              id="role-input"
+              name="role"
+              type="text"
+              placeholder="e.g., Frontend Engineer"
+              class="w-full rounded-xl border border-(--color-border) bg-white px-3 py-2 text-sm outline-none transition focus:border-(--color-accent) focus:ring-2 focus:ring-(--color-accent-soft)"
+            />
+          </label>
+
+          <label class="space-y-1">
+            <span class="block text-xs font-medium text-(--color-muted)">Status</span>
+            <select
+              id="new-status-input"
+              name="status"
+              class="w-full rounded-xl border border-(--color-border) bg-white px-3 py-2 text-sm outline-none transition focus:border-(--color-accent) focus:ring-2 focus:ring-(--color-accent-soft)"
+            >
+              <option value="Applied" selected>Applied</option>
+              <option value="Screening">Screening</option>
+              <option value="Interview">Interview</option>
+              <option value="Offer">Offer</option>
+            </select>
+          </label>
+
+          <label class="space-y-1 sm:col-span-2">
+            <span class="block text-xs font-medium text-(--color-muted)">Notes (optional)</span>
+            <textarea
+              id="notes-input"
+              name="notes"
+              rows="3"
+              placeholder="Optional hiring notes"
+              class="w-full rounded-xl border border-(--color-border) bg-white px-3 py-2 text-sm outline-none transition focus:border-(--color-accent) focus:ring-2 focus:ring-(--color-accent-soft)"
+            ></textarea>
+          </label>
+
+          <div class="sm:col-span-2 flex flex-wrap items-center gap-3">
+            <button
+              id="add-applicant-button"
+              type="submit"
+              class="inline-flex items-center rounded-xl bg-(--color-accent) px-4 py-2 text-sm font-medium text-white"
+            >
+              Upload & Scan CV
+            </button>
+            <p id="add-applicant-message" class="text-sm text-(--color-muted)" aria-live="polite"></p>
+          </div>
+        </form>
+      </section>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,182 @@
+:root {
+  --color-bg: #f6f7fb;
+  --color-text: #101322;
+  --color-muted: #5b6478;
+  --color-border: #dde1ea;
+  --color-accent: #4f46e5;
+  --color-accent-soft: #c7d2fe;
+  --color-chip-bg: #eef2ff;
+  --color-chip-text: #3730a3;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-pill: 999px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  background:
+    radial-gradient(circle at top right, color-mix(in oklab, var(--color-accent-soft) 45%, transparent), transparent 40%),
+    radial-gradient(circle at top left, color-mix(in oklab, var(--color-chip-bg) 70%, transparent), transparent 55%),
+    var(--color-bg);
+  color: var(--color-text);
+}
+
+a {
+  text-underline-offset: 3px;
+  transition: color 160ms ease, text-decoration-color 160ms ease;
+}
+
+a:hover {
+  color: color-mix(in oklab, var(--color-accent) 86%, var(--color-text));
+}
+
+::selection {
+  background: var(--color-accent-soft);
+}
+
+main > section,
+.details-layout > article,
+#candidates-list > li {
+  border-color: color-mix(in oklab, var(--color-border) 84%, var(--color-accent-soft));
+  transition: border-color 180ms ease, transform 180ms ease, background-color 180ms ease;
+}
+
+#candidates-list > li:hover {
+  border-color: color-mix(in oklab, var(--color-accent-soft) 70%, var(--color-border));
+  transform: translateY(-2px);
+}
+
+.details-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.details-buttons {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.details-button {
+  border: 1px solid color-mix(in oklab, var(--color-accent) 70%, var(--color-border));
+  background: linear-gradient(
+    135deg,
+    var(--color-accent),
+    color-mix(in oklab, var(--color-accent) 72%, var(--color-chip-text))
+  );
+  color: #fff;
+  border-radius: var(--radius-md);
+  padding: 9px 14px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 120ms ease, filter 120ms ease, opacity 120ms ease;
+}
+
+.details-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  filter: brightness(1.03);
+}
+
+.details-button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.details-button:focus-visible {
+  outline: 2px solid var(--color-accent-soft);
+  outline-offset: 2px;
+}
+
+.details-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.details-link {
+  color: var(--color-accent);
+  font-size: 14px;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.details-link:hover {
+  text-decoration: underline;
+}
+
+.details-layout {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.details-form {
+  display: grid;
+  gap: 12px;
+}
+
+.details-form label span {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--color-muted);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.details-input {
+  width: 100%;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: #fff;
+  color: var(--color-text);
+  padding: 10px 12px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 140ms ease, box-shadow 140ms ease, background-color 140ms ease;
+}
+
+.details-input:focus {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 2px var(--color-accent-soft);
+}
+
+.details-input:hover {
+  border-color: color-mix(in oklab, var(--color-border) 68%, var(--color-accent-soft));
+}
+
+.details-textarea,
+.details-json {
+  resize: vertical;
+  min-height: 120px;
+}
+
+.skills-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.skill-chip {
+  border-radius: var(--radius-pill);
+  background: var(--color-chip-bg);
+  color: var(--color-chip-text);
+  border: 1px solid color-mix(in oklab, var(--color-chip-bg) 45%, var(--color-border));
+  padding: 5px 10px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+@media (max-width: 900px) {
+  .details-layout {
+    grid-template-columns: 1fr;
+  }
+}

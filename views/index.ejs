@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= title %></title>
+    <link rel="stylesheet" href="/styles.css" />
+    <link rel="stylesheet" href="/style.css" />
+    <script defer src="/app.js"></script>
+  </head>
+  <body class="min-h-screen bg-(--color-bg) text-(--color-text) antialiased">
+    <header class="mx-auto max-w-5xl px-6 py-10">
+      <h1 class="text-3xl font-semibold tracking-tight"><%= companyName %></h1>
+      <p class="mt-2 text-sm text-(--color-muted)"><%= companySubtitle %></p>
+    </header>
+
+    <main class="mx-auto max-w-5xl px-6 pb-12">
+      <section class="rounded-2xl border border-(--color-border) bg-white p-5 shadow-sm">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <h2 class="text-sm font-medium uppercase tracking-wide text-(--color-muted)">Candidate Directory</h2>
+          <a
+            href="/applicants/new"
+            class="inline-flex items-center rounded-xl bg-(--color-accent) px-4 py-2 text-sm font-medium text-white"
+          >
+            Add New Applicant
+          </a>
+        </div>
+        <div class="mt-4 grid gap-3 sm:grid-cols-2">
+          <label class="space-y-1">
+            <span class="block text-xs font-medium text-(--color-muted)">Search</span>
+            <input
+              id="search-input"
+              type="text"
+              placeholder="Name, role, or notes"
+              class="w-full rounded-xl border border-(--color-border) bg-white px-3 py-2 text-sm outline-none transition focus:border-(--color-accent) focus:ring-2 focus:ring-(--color-accent-soft)"
+            />
+          </label>
+
+          <label class="space-y-1">
+            <span class="block text-xs font-medium text-(--color-muted)">Status</span>
+            <select
+              id="status-filter"
+              class="w-full rounded-xl border border-(--color-border) bg-white px-3 py-2 text-sm outline-none transition focus:border-(--color-accent) focus:ring-2 focus:ring-(--color-accent-soft)"
+            >
+              <option value="all">All statuses</option>
+            </select>
+          </label>
+        </div>
+      </section>
+
+      <section class="mt-6" aria-live="polite">
+        <p id="loading" class="text-sm text-(--color-muted)">Loading candidates...</p>
+        <p id="error" class="hidden rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"></p>
+
+        <div id="empty" class="hidden rounded-xl border border-(--color-border) bg-white px-4 py-6 text-sm text-(--color-muted)">
+          No candidates match your filters.
+        </div>
+
+        <ul id="candidates-list" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"></ul>
+      </section>
+    </main>
+  </body>
+</html>

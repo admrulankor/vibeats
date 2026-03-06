@@ -7,8 +7,8 @@
     "dev": "bun --hot server.js",
     "start": "bun run server.js",
     "seed": "bun run seed.js",
-    "build:css": "bunx @tailwindcss/cli -i ./src/styles/tailwind.css -o ./public/styles.css --minify",
-    "watch:css": "bunx @tailwindcss/cli -i ./src/styles/tailwind.css -o ./public/styles.css --watch"
+    "build:css": "bunx @tailwindcss/cli -i ./assets/css/tailwind.css -o ./assets/css/styles.css --minify",
+    "watch:css": "bunx @tailwindcss/cli -i ./assets/css/tailwind.css -o ./assets/css/styles.css --watch"
   },
   "devDependencies": {
     "@tailwindcss/cli": "^4.1.0",

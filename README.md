@@ -1,11 +1,21 @@
 # vibeats
 
-GPL-3.0 open-source ATS MVP for a fictional comic production collective.
+GPL-3.0 open-source ATS for any purposes. Crafted from scratch and vibe-coded
+
+## Features
+
+- Easily edit branding in provided YAML config
+- Upload and extract CV/resume data
+
+### Soon
+
+- More customization options
+- Extracted data can be easily readable instead of a JSON format
 
 ## Stack
 
 - Bun runtime
-- Express.js backend + EJS views
+- Bun native HTTP server (`Bun.serve`) + EJS views
 - PostgreSQL via Bun native SQL client (`import { SQL } from "bun"`)
 - Tailwind CSS v4.1 (CLI)
 - Vanilla JavaScript + Alpine.js for interactivity

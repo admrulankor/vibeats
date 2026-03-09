@@ -1,4 +1,3 @@
-import express from "express";
 import fs from "node:fs";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
@@ -6,11 +5,10 @@ import { fileURLToPath } from "node:url";
 import YAML from "yaml";
 import PDFDocument from "pdfkit";
 import { PDFParse } from "pdf-parse";
-import multer from "multer";
+import ejs from "ejs";
 import { sql } from "./db.js";
 
-const app = express();
-const port = Number(Bun.env.PORT || process.env.PORT || 3000);
+const port = Number(Bun.env.PORT || 3000);
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -38,8 +36,13 @@ function loadAppConfig() {
 const appConfig = loadAppConfig();
 const availableStatuses = new Set(["Applied", "Screening", "Interview", "Offer"]);
 const uploadsDirectory = path.join(__dirname, "assets", "uploads");
-const autoExtractionIntervalMs = Number(Bun.env.CV_AUTO_EXTRACT_INTERVAL_MS || process.env.CV_AUTO_EXTRACT_INTERVAL_MS || 30000);
+const publicDirectory = path.join(__dirname, "public");
+const assetsDirectory = path.join(__dirname, "assets");
+const viewsDirectory = path.join(__dirname, "views");
+const autoExtractionIntervalMs = Number(Bun.env.CV_AUTO_EXTRACT_INTERVAL_MS || 30000);
 let autoExtractionPassRunning = false;
+const maxJsonBodyBytes = 1024 * 1024;
+const maxUploadBytes = 8 * 1024 * 1024;
 const headingLabels = [
   "summary",
   "profile",
@@ -58,41 +61,6 @@ const headingLabels = [
   "selected comic book credits"
 ];
 const applicationStatuses = ["Applied", "Screening", "Interview", "Offer"];
-
-const upload = multer({
-  storage: multer.diskStorage({
-    destination: (_request, _file, callback) => {
-      fs.mkdirSync(uploadsDirectory, { recursive: true });
-      callback(null, uploadsDirectory);
-    },
-    filename: (_request, file, callback) => {
-      const extension = path.extname(file.originalname || "").toLowerCase() || ".pdf";
-      const baseName = path.basename(file.originalname || "cv", extension);
-      const sanitizedBase = baseName
-        .replace(/[^A-Za-z0-9\-_.\s]/g, "")
-        .trim()
-        .replace(/\s+/g, "-")
-        .slice(0, 60) || "cv";
-
-      callback(null, `${Date.now()}-${randomUUID()}-${sanitizedBase}${extension}`);
-    }
-  }),
-  limits: {
-    fileSize: 8 * 1024 * 1024
-  },
-  fileFilter: (_request, file, callback) => {
-    const filename = file.originalname || "";
-    const isPdfMime = file.mimetype === "application/pdf";
-    const isPdfName = /\.pdf$/i.test(filename);
-
-    if (isPdfMime || isPdfName) {
-      callback(null, true);
-      return;
-    }
-
-    callback(new Error("Only PDF files are supported."));
-  }
-});
 
 function escapeRegExp(value) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -1045,117 +1013,178 @@ function writeCandidateCv(document, candidate) {
     })
     .moveDown(1.2);
 }
-
-app.set("view engine", "ejs");
-app.set("views", path.join(__dirname, "views"));
-
-app.use(express.static(path.join(__dirname, "public")));
-app.use("/assets", express.static(path.join(__dirname, "assets")));
-app.use(express.json({ limit: "1mb" }));
-
-app.get("/", (_request, response) => {
-  response.render("index", {
-    title: appConfig.companyName,
-    companyName: appConfig.companyName,
-    companySubtitle: appConfig.companySubtitle
+function jsonResponse(payload, status = 200, headers = {}) {
+  return new Response(JSON.stringify(payload), {
+    status,
+    headers: {
+      "Content-Type": "application/json; charset=utf-8",
+      ...headers
+    }
   });
-});
+}
 
-app.get("/applicants/new", (_request, response) => {
-  response.render("new-applicant", {
-    title: `${appConfig.companyName} · Add Applicant`,
-    companyName: appConfig.companyName,
-    companySubtitle: appConfig.companySubtitle
+function textResponse(body, status = 200, headers = {}) {
+  return new Response(body, {
+    status,
+    headers: {
+      "Content-Type": "text/plain; charset=utf-8",
+      ...headers
+    }
   });
-});
+}
 
-app.get("/candidates/:id", (request, response) => {
-  const candidateId = Number.parseInt(request.params.id, 10);
+function createHttpError(status, message) {
+  const error = new Error(message);
+  error.status = status;
+  return error;
+}
 
-  if (Number.isNaN(candidateId)) {
-    response.status(400).send("Invalid candidate id.");
-    return;
+function safeStaticPath(rootDirectory, incomingPath) {
+  const relativePath = incomingPath.replace(/^[/\\]+/, "");
+  const resolvedRoot = path.resolve(rootDirectory);
+  const resolvedPath = path.resolve(rootDirectory, relativePath);
+
+  if (resolvedPath === resolvedRoot || resolvedPath.startsWith(`${resolvedRoot}${path.sep}`)) {
+    return resolvedPath;
   }
 
-  response.render("candidate", {
-    title: `${appConfig.companyName} · Candidate`,
-    companyName: appConfig.companyName,
-    companySubtitle: appConfig.companySubtitle,
-    candidateId
-  });
-});
+  return null;
+}
 
-app.get("/api/candidates", async (_request, response) => {
+async function maybeServeFile(filePath) {
+  if (!filePath || !fs.existsSync(filePath)) {
+    return null;
+  }
+
+  const stats = fs.statSync(filePath);
+
+  if (!stats.isFile()) {
+    return null;
+  }
+
+  return new Response(Bun.file(filePath));
+}
+
+function renderView(viewName, data) {
+  return new Promise((resolve, reject) => {
+    ejs.renderFile(path.join(viewsDirectory, `${viewName}.ejs`), data, (error, html) => {
+      if (error) {
+        reject(error);
+        return;
+      }
+
+      resolve(
+        new Response(html, {
+          headers: {
+            "Content-Type": "text/html; charset=utf-8"
+          }
+        })
+      );
+    });
+  });
+}
+
+function parseIdSegment(pathname, prefix, suffix = "") {
+  const escapedPrefix = prefix.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const escapedSuffix = suffix.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const matcher = new RegExp(`^${escapedPrefix}([^/]+)${escapedSuffix}$`);
+  const match = pathname.match(matcher);
+
+  if (!match) {
+    return null;
+  }
+
+  const candidateId = Number.parseInt(match[1], 10);
+
+  return Number.isNaN(candidateId)
+    ? {
+        invalid: true
+      }
+    : {
+        value: candidateId
+      };
+}
+
+async function parseJsonBody(request) {
+  const contentLength = Number(request.headers.get("content-length") || "0");
+
+  if (contentLength > maxJsonBodyBytes) {
+    throw createHttpError(413, "JSON payload is too large.");
+  }
+
+  const rawBody = await request.text();
+
+  if (Buffer.byteLength(rawBody, "utf8") > maxJsonBodyBytes) {
+    throw createHttpError(413, "JSON payload is too large.");
+  }
+
+  if (!rawBody.trim()) {
+    return {};
+  }
+
   try {
-    const candidates = await getAllCandidates();
-
-    response.json(candidates.map(toCandidateDto));
-  } catch (error) {
-    console.error("Failed to fetch candidates:", error);
-    response.status(500).json({ error: "Unable to fetch candidates." });
+    return JSON.parse(rawBody);
+  } catch (_error) {
+    throw createHttpError(400, "Invalid JSON payload.");
   }
-});
+}
 
-app.get("/api/candidates/:id", async (request, response) => {
-  const candidateId = Number.parseInt(request.params.id, 10);
+function sanitizeUploadFilename(originalname) {
+  const extension = path.extname(originalname || "").toLowerCase() || ".pdf";
+  const baseName = path.basename(originalname || "cv", extension);
+  const sanitizedBase = baseName
+    .replace(/[^A-Za-z0-9\-_.\s]/g, "")
+    .trim()
+    .replace(/\s+/g, "-")
+    .slice(0, 60) || "cv";
 
-  if (Number.isNaN(candidateId)) {
-    response.status(400).json({ error: "Invalid candidate id." });
-    return;
-  }
+  return `${Date.now()}-${randomUUID()}-${sanitizedBase}${extension}`;
+}
+
+function getStringFormField(formData, key) {
+  const value = formData.get(key);
+
+  return typeof value === "string" ? value.trim() : "";
+}
+
+async function handleUploadScan(request) {
+  let parser;
+  let uploadedFilePath;
 
   try {
-    const candidate = await getCandidateById(candidateId);
+    const formData = await request.formData();
+    const cv = formData.get("cv");
 
-    if (!candidate) {
-      response.status(404).json({ error: "Candidate not found." });
-      return;
+    if (!(cv instanceof File)) {
+      return jsonResponse({ error: "A CV PDF file is required." }, 400);
     }
 
-    response.json(toCandidateDto(candidate));
-  } catch (error) {
-    console.error("Failed to fetch candidate details:", error);
-    response.status(500).json({ error: "Unable to fetch candidate details." });
-  }
-});
+    const originalname = cv.name || "cv.pdf";
+    const isPdfMime = cv.type === "application/pdf";
+    const isPdfName = /\.pdf$/i.test(originalname);
 
-app.post("/api/candidates/:id/extract", async (request, response) => {
-  const candidateId = Number.parseInt(request.params.id, 10);
+    if (!isPdfMime && !isPdfName) {
+      return jsonResponse({ error: "Only PDF files are supported." }, 400);
+    }
 
-  if (Number.isNaN(candidateId)) {
-    response.status(400).json({ error: "Invalid candidate id." });
-    return;
-  }
+    if (cv.size > maxUploadBytes) {
+      return jsonResponse({ error: "File is too large. Maximum allowed size is 8MB." }, 400);
+    }
 
-  try {
-    const updatedCandidate = await extractCandidateCvData(candidateId);
-    response.json(toCandidateDto(updatedCandidate));
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Extraction failed.";
-    const statusCode = message === "Candidate not found." ? 404 : message.includes("No CV PDF") ? 400 : 500;
+    fs.mkdirSync(uploadsDirectory, { recursive: true });
 
-    console.error("CV extraction failed:", error);
-    response.status(statusCode).json({ error: message });
-  }
-});
+    const filename = sanitizeUploadFilename(originalname);
+    const filePath = path.join(uploadsDirectory, filename);
+    const buffer = Buffer.from(await cv.arrayBuffer());
 
-app.post("/api/candidates/upload-scan", upload.single("cv"), async (request, response) => {
-  const uploadedFile = request.file;
+    uploadedFilePath = filePath;
+    await Bun.write(filePath, buffer);
 
-  if (!uploadedFile) {
-    response.status(400).json({ error: "A CV PDF file is required." });
-    return;
-  }
+    const requestedStatus = getStringFormField(formData, "status");
+    const status = applicationStatuses.includes(requestedStatus) ? requestedStatus : "Applied";
+    const requestedRole = getStringFormField(formData, "role");
+    const requestedNotes = getStringFormField(formData, "notes");
 
-  const requestedStatus = typeof request.body?.status === "string" ? request.body.status.trim() : "";
-  const status = applicationStatuses.includes(requestedStatus) ? requestedStatus : "Applied";
-  const requestedRole = typeof request.body?.role === "string" ? request.body.role.trim() : "";
-  const requestedNotes = typeof request.body?.notes === "string" ? request.body.notes.trim() : "";
-
-  let parser;
-
-  try {
-    const buffer = fs.readFileSync(uploadedFile.path);
     parser = new PDFParse({ data: buffer });
     const parsedPdf = await parser.getText();
     const rawText = (parsedPdf.text || "").trim();
@@ -1165,13 +1194,13 @@ app.post("/api/candidates/upload-scan", upload.single("cv"), async (request, res
     }
 
     const extracted = extractCandidateDataFromCvText(rawText, {
-      name: extractNameFromFilename(uploadedFile.originalname),
+      name: extractNameFromFilename(originalname),
       role: requestedRole || "Applicant",
       notes: requestedNotes || null
     });
     const portfolio = extractPortfolioHighlights(rawText);
 
-    const candidateName = extracted.name || extractNameFromFilename(uploadedFile.originalname) || "Unnamed Applicant";
+    const candidateName = extracted.name || extractNameFromFilename(originalname) || "Unnamed Applicant";
     const role = requestedRole || extracted.role || "Applicant";
     const notes = requestedNotes || extracted.summary || "Uploaded CV and scanned automatically.";
 
@@ -1201,7 +1230,7 @@ app.post("/api/candidates/upload-scan", upload.single("cv"), async (request, res
         ${role},
         ${status},
         ${notes},
-        ${uploadedFile.filename},
+        ${filename},
         'completed',
         NULL,
         NOW(),
@@ -1220,19 +1249,19 @@ app.post("/api/candidates/upload-scan", upload.single("cv"), async (request, res
     `;
 
     const createdCandidate = await getCandidateById(inserted[0].id);
-    response.status(201).json(toCandidateDto(createdCandidate));
+    return jsonResponse(toCandidateDto(createdCandidate), 201);
   } catch (error) {
     console.error("Failed to upload and scan CV:", error);
 
     try {
-      if (uploadedFile.path && fs.existsSync(uploadedFile.path)) {
-        fs.unlinkSync(uploadedFile.path);
+      if (uploadedFilePath && fs.existsSync(uploadedFilePath)) {
+        fs.unlinkSync(uploadedFilePath);
       }
     } catch (_unlinkError) {
     }
 
     const message = error instanceof Error ? error.message : "Unable to upload and scan CV.";
-    response.status(400).json({ error: message });
+    return jsonResponse({ error: message }, 400);
   } finally {
     if (parser) {
       try {
@@ -1241,105 +1270,233 @@ app.post("/api/candidates/upload-scan", upload.single("cv"), async (request, res
       }
     }
   }
-});
+}
 
-app.put("/api/candidates/:id/extracted-data", async (request, response) => {
-  const candidateId = Number.parseInt(request.params.id, 10);
-
-  if (Number.isNaN(candidateId)) {
-    response.status(400).json({ error: "Invalid candidate id." });
-    return;
-  }
-
-  const candidate = await getCandidateById(candidateId);
-
-  if (!candidate) {
-    response.status(404).json({ error: "Candidate not found." });
-    return;
-  }
-
-  const payload = request.body || {};
-  const profile = payload.profile || {};
-
-  const skills = Array.isArray(payload.skills) ? payload.skills : [];
-  const experience = Array.isArray(payload.experience) ? payload.experience : [];
-  const education = Array.isArray(payload.education) ? payload.education : [];
-  const works = Array.isArray(payload.works) ? payload.works : [];
-  const awards = Array.isArray(payload.awards) ? payload.awards : [];
-
-  try {
-    await sql`
-      UPDATE candidates
-      SET
-        extraction_status = 'completed',
-        extraction_error = NULL,
-        extracted_at = COALESCE(extracted_at, NOW()),
-        profile_email = ${profile.email || null},
-        profile_phone = ${profile.phone || null},
-        profile_location = ${profile.location || null},
-        profile_summary = ${profile.summary || null},
-        skills_json = ${JSON.stringify(skills)}::jsonb,
-        experience_json = ${JSON.stringify(experience)}::jsonb,
-        education_json = ${JSON.stringify(education)}::jsonb,
-        works_json = ${JSON.stringify(works)}::jsonb,
-        awards_json = ${JSON.stringify(awards)}::jsonb
-      WHERE id = ${candidateId}
-    `;
-
-    const updatedCandidate = await getCandidateById(candidateId);
-    response.json(toCandidateDto(updatedCandidate));
-  } catch (error) {
-    console.error("Failed to update extracted candidate data:", error);
-    response.status(500).json({ error: "Unable to update extracted candidate data." });
-  }
-});
-
-app.get("/api/candidates/available", async (_request, response) => {
-  try {
-    const candidates = await getAllCandidates();
-    const availableCandidates = candidates
-      .filter((candidate) => availableStatuses.has(candidate.status))
-      .map(toCandidateDto);
-
-    response.json(availableCandidates);
-  } catch (error) {
-    console.error("Failed to fetch available candidates:", error);
-    response.status(500).json({ error: "Unable to fetch available candidates." });
-  }
-});
-
-app.get("/api/candidates/available/cv.pdf", async (_request, response) => {
-  try {
-    const candidates = await getAllCandidates();
-    const availableCandidates = candidates.filter((candidate) => availableStatuses.has(candidate.status));
-
-    if (!availableCandidates.length) {
-      response.status(404).json({ error: "No available candidates found." });
-      return;
-    }
-
-    response.setHeader("Content-Type", "application/pdf");
-    response.setHeader("Content-Disposition", 'attachment; filename="available-applicants-cv.pdf"');
-
+function buildAvailableCandidatesPdf(candidates) {
+  return new Promise((resolve, reject) => {
     const document = new PDFDocument({ margin: 48, size: "A4" });
-    document.pipe(response);
+    const chunks = [];
+
+    document.on("data", (chunk) => {
+      chunks.push(Buffer.from(chunk));
+    });
+
+    document.on("end", () => {
+      resolve(Buffer.concat(chunks));
+    });
+
+    document.on("error", reject);
 
     writeCvDocumentHeader(document, "Available Applicants CV Packet");
 
-    availableCandidates.forEach((candidate, index) => {
+    candidates.forEach((candidate, index) => {
       writeCandidateCv(document, candidate);
 
-      if (index < availableCandidates.length - 1) {
+      if (index < candidates.length - 1) {
         document.addPage();
       }
     });
 
     document.end();
-  } catch (error) {
-    console.error("Failed to generate available candidate CV PDF:", error);
-    response.status(500).json({ error: "Unable to generate candidate CV PDF." });
+  });
+}
+
+async function handleRequest(request) {
+  const url = new URL(request.url);
+  const pathname = decodeURIComponent(url.pathname);
+  const method = request.method.toUpperCase();
+
+  if (method === "GET" && pathname === "/") {
+    return renderView("index", {
+      title: appConfig.companyName,
+      companyName: appConfig.companyName,
+      companySubtitle: appConfig.companySubtitle
+    });
   }
-});
+
+  if (method === "GET" && pathname === "/applicants/new") {
+    return renderView("new-applicant", {
+      title: `${appConfig.companyName} · Add Applicant`,
+      companyName: appConfig.companyName,
+      companySubtitle: appConfig.companySubtitle
+    });
+  }
+
+  const candidatePageMatch = parseIdSegment(pathname, "/candidates/");
+
+  if (method === "GET" && candidatePageMatch) {
+    if (candidatePageMatch.invalid) {
+      return textResponse("Invalid candidate id.", 400);
+    }
+
+    return renderView("candidate", {
+      title: `${appConfig.companyName} · Candidate`,
+      companyName: appConfig.companyName,
+      companySubtitle: appConfig.companySubtitle,
+      candidateId: candidatePageMatch.value
+    });
+  }
+
+  if (method === "GET" && pathname === "/api/candidates") {
+    try {
+      const candidates = await getAllCandidates();
+      return jsonResponse(candidates.map(toCandidateDto));
+    } catch (error) {
+      console.error("Failed to fetch candidates:", error);
+      return jsonResponse({ error: "Unable to fetch candidates." }, 500);
+    }
+  }
+
+  if (method === "GET" && pathname === "/api/candidates/available") {
+    try {
+      const candidates = await getAllCandidates();
+      const availableCandidates = candidates.filter((candidate) => availableStatuses.has(candidate.status)).map(toCandidateDto);
+      return jsonResponse(availableCandidates);
+    } catch (error) {
+      console.error("Failed to fetch available candidates:", error);
+      return jsonResponse({ error: "Unable to fetch available candidates." }, 500);
+    }
+  }
+
+  if (method === "GET" && pathname === "/api/candidates/available/cv.pdf") {
+    try {
+      const candidates = await getAllCandidates();
+      const availableCandidates = candidates.filter((candidate) => availableStatuses.has(candidate.status));
+
+      if (!availableCandidates.length) {
+        return jsonResponse({ error: "No available candidates found." }, 404);
+      }
+
+      const pdfBuffer = await buildAvailableCandidatesPdf(availableCandidates);
+      return new Response(pdfBuffer, {
+        headers: {
+          "Content-Type": "application/pdf",
+          "Content-Disposition": 'attachment; filename="available-applicants-cv.pdf"'
+        }
+      });
+    } catch (error) {
+      console.error("Failed to generate available candidate CV PDF:", error);
+      return jsonResponse({ error: "Unable to generate candidate CV PDF." }, 500);
+    }
+  }
+
+  const apiCandidateMatch = parseIdSegment(pathname, "/api/candidates/");
+
+  if (method === "GET" && apiCandidateMatch) {
+    if (apiCandidateMatch.invalid) {
+      return jsonResponse({ error: "Invalid candidate id." }, 400);
+    }
+
+    try {
+      const candidate = await getCandidateById(apiCandidateMatch.value);
+
+      if (!candidate) {
+        return jsonResponse({ error: "Candidate not found." }, 404);
+      }
+
+      return jsonResponse(toCandidateDto(candidate));
+    } catch (error) {
+      console.error("Failed to fetch candidate details:", error);
+      return jsonResponse({ error: "Unable to fetch candidate details." }, 500);
+    }
+  }
+
+  const extractMatch = parseIdSegment(pathname, "/api/candidates/", "/extract");
+
+  if (method === "POST" && extractMatch) {
+    if (extractMatch.invalid) {
+      return jsonResponse({ error: "Invalid candidate id." }, 400);
+    }
+
+    try {
+      const updatedCandidate = await extractCandidateCvData(extractMatch.value);
+      return jsonResponse(toCandidateDto(updatedCandidate));
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Extraction failed.";
+      const statusCode = message === "Candidate not found." ? 404 : message.includes("No CV PDF") ? 400 : 500;
+
+      console.error("CV extraction failed:", error);
+      return jsonResponse({ error: message }, statusCode);
+    }
+  }
+
+  if (method === "POST" && pathname === "/api/candidates/upload-scan") {
+    return handleUploadScan(request);
+  }
+
+  const extractedDataMatch = parseIdSegment(pathname, "/api/candidates/", "/extracted-data");
+
+  if (method === "PUT" && extractedDataMatch) {
+    if (extractedDataMatch.invalid) {
+      return jsonResponse({ error: "Invalid candidate id." }, 400);
+    }
+
+    try {
+      const payload = await parseJsonBody(request);
+      const candidateId = extractedDataMatch.value;
+      const candidate = await getCandidateById(candidateId);
+
+      if (!candidate) {
+        return jsonResponse({ error: "Candidate not found." }, 404);
+      }
+
+      const profile = payload.profile || {};
+      const skills = Array.isArray(payload.skills) ? payload.skills : [];
+      const experience = Array.isArray(payload.experience) ? payload.experience : [];
+      const education = Array.isArray(payload.education) ? payload.education : [];
+      const works = Array.isArray(payload.works) ? payload.works : [];
+      const awards = Array.isArray(payload.awards) ? payload.awards : [];
+
+      await sql`
+        UPDATE candidates
+        SET
+          extraction_status = 'completed',
+          extraction_error = NULL,
+          extracted_at = COALESCE(extracted_at, NOW()),
+          profile_email = ${profile.email || null},
+          profile_phone = ${profile.phone || null},
+          profile_location = ${profile.location || null},
+          profile_summary = ${profile.summary || null},
+          skills_json = ${JSON.stringify(skills)}::jsonb,
+          experience_json = ${JSON.stringify(experience)}::jsonb,
+          education_json = ${JSON.stringify(education)}::jsonb,
+          works_json = ${JSON.stringify(works)}::jsonb,
+          awards_json = ${JSON.stringify(awards)}::jsonb
+        WHERE id = ${candidateId}
+      `;
+
+      const updatedCandidate = await getCandidateById(candidateId);
+      return jsonResponse(toCandidateDto(updatedCandidate));
+    } catch (error) {
+      if (error?.status) {
+        return jsonResponse({ error: error.message }, error.status);
+      }
+
+      console.error("Failed to update extracted candidate data:", error);
+      return jsonResponse({ error: "Unable to update extracted candidate data." }, 500);
+    }
+  }
+
+  if (pathname.startsWith("/assets/")) {
+    const assetPath = safeStaticPath(assetsDirectory, pathname.slice("/assets/".length));
+    const assetResponse = await maybeServeFile(assetPath);
+
+    if (assetResponse) {
+      return assetResponse;
+    }
+  }
+
+  if (method === "GET") {
+    const filePath = safeStaticPath(publicDirectory, pathname);
+    const fileResponse = await maybeServeFile(filePath);
+
+    if (fileResponse) {
+      return fileResponse;
+    }
+  }
+
+  return jsonResponse({ error: "Not found." }, 404);
+}
 
 async function startServer() {
   try {
@@ -1355,9 +1512,19 @@ async function startServer() {
     console.error("Failed to initialize CV metadata:", error);
   }
 
-  app.listen(port, () => {
-    console.log(`ATS server running at http://localhost:${port}`);
+  Bun.serve({
+    port,
+    fetch: async (request) => {
+      try {
+        return await handleRequest(request);
+      } catch (error) {
+        console.error("Unhandled server error:", error);
+        return jsonResponse({ error: "Internal server error." }, 500);
+      }
+    }
   });
+
+  console.log(`ATS server running at http://localhost:${port}`);
 }
 
 startServer();

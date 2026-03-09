@@ -56,7 +56,7 @@ export const headingLabels = [
 export const directories = {
   root: rootDirectory,
   uploads: path.join(rootDirectory, "assets", "uploads"),
-  public: path.join(rootDirectory, "public"),
+  public: path.join(rootDirectory, "src", "public"),
   assets: path.join(rootDirectory, "assets"),
   views: path.join(rootDirectory, "views")
 };

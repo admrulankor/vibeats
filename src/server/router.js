@@ -31,7 +31,8 @@ export async function handleRequest(request) {
     return renderView("new-applicant", {
       title: `${appConfig.companyName} · Add Applicant`,
       companyName: appConfig.companyName,
-      companySubtitle: appConfig.companySubtitle
+      companySubtitle: appConfig.companySubtitle,
+      applicationStatuses
     });
   }
 
@@ -39,7 +40,8 @@ export async function handleRequest(request) {
     return renderView("kanban", {
       title: `${appConfig.companyName} · Kanban`,
       companyName: appConfig.companyName,
-      companySubtitle: appConfig.companySubtitle
+      companySubtitle: appConfig.companySubtitle,
+      applicationStatuses
     });
   }
 

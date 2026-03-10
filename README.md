@@ -133,6 +133,7 @@ Multipart form fields:
 - `cv` (required, PDF file)
 - `role` (optional)
 - `status` (optional; defaults to `Applied`)
+	- Allowed values: `Applied`, `Interested`, `Shortlisted`, `Client Submission`, `Client Interview`, `Offer`, `Hired`, `Started`, `Probation passed`
 - `notes` (optional)
 
 ## UI Configuration

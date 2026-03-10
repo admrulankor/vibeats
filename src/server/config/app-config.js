@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import YAML from "yaml";
+import { APPLICATION_STATUSES } from "../../shared/application-statuses.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -29,8 +30,8 @@ function loadAppConfig() {
 
 export const port = Number(Bun.env.PORT || 3000);
 export const appConfig = loadAppConfig();
-export const availableStatuses = new Set(["Applied", "Screening", "Interview", "Offer"]);
-export const applicationStatuses = ["Applied", "Screening", "Interview", "Offer"];
+export const applicationStatuses = [...APPLICATION_STATUSES];
+export const availableStatuses = new Set(applicationStatuses);
 export const autoExtractionIntervalMs = Number(Bun.env.CV_AUTO_EXTRACT_INTERVAL_MS || 30000);
 export const maxJsonBodyBytes = 1024 * 1024;
 export const maxUploadBytes = 8 * 1024 * 1024;

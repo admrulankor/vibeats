@@ -42,6 +42,8 @@ Update `DATABASE_URL` in `.env` to match your local PostgreSQL instance.
 bun run seed
 ```
 
+This initializes tables and application statuses only. It does not insert sample candidates.
+
 4. Build Tailwind CSS:
 
 ```bash

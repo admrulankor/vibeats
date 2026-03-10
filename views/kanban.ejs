@@ -9,23 +9,23 @@
     <script type="module" src="/kanban.js"></script>
   </head>
   <body class="min-h-screen bg-(--color-bg) text-(--color-text) antialiased">
-    <header class="mx-auto max-w-7xl px-6 py-10">
+    <header class="mx-auto w-full px-4 py-6 sm:px-6 sm:py-10">
       <div class="flex flex-wrap items-center justify-between gap-3">
-        <div>
+        <div class="min-w-0">
           <a href="/" class="text-sm text-(--color-accent)">← Back to candidate directory</a>
-          <h1 class="mt-2 text-3xl font-semibold tracking-tight">Candidate Status Board</h1>
-          <p class="mt-2 text-sm text-(--color-muted)"><%= companyName %> · Drag cards between columns to update status</p>
+          <h1 class="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">Candidate Status Board</h1>
+          <p class="mt-2 max-w-2xl text-xs text-(--color-muted) sm:text-sm"><%= companyName %> · Drag cards between columns to update status</p>
         </div>
         <a
           href="/applicants/new"
-          class="inline-flex items-center rounded-xl bg-(--color-accent) px-4 py-2 text-sm font-medium text-white"
+          class="inline-flex w-full items-center justify-center rounded-xl bg-(--color-accent) px-4 py-2 text-sm font-medium text-white sm:w-auto"
         >
           Add New Applicant
         </a>
       </div>
     </header>
 
-    <main class="mx-auto max-w-7xl px-6 pb-12" aria-live="polite">
+    <main class="w-full px-4 pb-10 sm:px-6 sm:pb-12" aria-live="polite">
       <p id="kanban-loading" class="text-sm text-(--color-muted)">Loading candidates...</p>
       <p id="kanban-error" class="hidden rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"></p>
       <div
@@ -37,7 +37,7 @@
 
       <section
         id="kanban-columns"
-        class="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
+        class="mt-5 flex flex-col gap-3 sm:gap-4 lg:mt-6 lg:flex-row lg:overflow-x-auto lg:pb-3"
         data-statuses='<%- JSON.stringify(applicationStatuses) %>'
         aria-label="Candidate status columns"
       ></section>

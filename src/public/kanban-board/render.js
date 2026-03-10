@@ -26,15 +26,15 @@ function getCandidatesByStatus() {
 function createCard(candidate) {
   const item = document.createElement("li");
   item.className =
-    "rounded-2xl border border-(--color-border) bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-(--color-accent-soft)";
+    "min-w-0 rounded-2xl border border-(--color-border) bg-white p-3 shadow-sm transition hover:-translate-y-0.5 hover:border-(--color-accent-soft) sm:p-4";
   item.draggable = true;
   item.dataset.candidateId = String(candidate.id);
 
   item.innerHTML = `
-    <p class="text-base font-semibold">${candidate.name}</p>
-    <p class="mt-1 text-sm text-(--color-muted)">${candidate.role}</p>
+    <p class="wrap-break-word text-base font-semibold">${candidate.name}</p>
+    <p class="mt-1 wrap-break-word text-sm text-(--color-muted)">${candidate.role}</p>
     <p class="mt-2 text-xs text-(--color-muted)">CV extraction: ${candidate.extraction_status || "idle"}</p>
-    <p class="mt-2 line-clamp-3 text-sm leading-relaxed">${candidate.notes || "No notes yet."}</p>
+    <p class="mt-2 wrap-break-word text-sm leading-relaxed">${candidate.notes || "No notes yet."}</p>
     <div class="mt-3 flex flex-wrap items-center justify-between gap-2">
       <a href="/candidates/${candidate.id}" class="text-sm font-medium text-(--color-accent)">Open details</a>
       <span class="text-xs text-(--color-muted)">${formatDate(candidate.created_at)}</span>
@@ -65,7 +65,8 @@ function createColumn(status, candidates) {
   const dragClass = isDraggingOver ? " ring-2 ring-(--color-accent)" : "";
 
   column.className =
-    "rounded-2xl border border-(--color-border) bg-white/70 p-3 shadow-sm backdrop-blur-sm transition" + dragClass;
+    "w-full min-w-0 rounded-2xl border border-(--color-border) bg-white/70 p-2.5 shadow-sm backdrop-blur-sm transition sm:p-3 lg:w-80 lg:min-w-80 lg:shrink-0" +
+    dragClass;
   column.dataset.statusColumn = status;
   column.setAttribute("aria-label", `${status} candidates column`);
 

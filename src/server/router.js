@@ -1,8 +1,9 @@
-import { appConfig, availableStatuses, directories } from "./config/app-config.js";
+import { appConfig, applicationStatuses, availableStatuses, directories } from "./config/app-config.js";
 import {
   getAllCandidates,
   getCandidateById,
-  updateCandidateExtractedData
+  updateCandidateExtractedData,
+  updateCandidateStatus
 } from "./data/candidates-repository.js";
 import { extractCandidateCvData } from "./services/extraction-service.js";
 import { toCandidateDto } from "./services/candidate-transformer.js";
@@ -29,6 +30,14 @@ export async function handleRequest(request) {
   if (method === "GET" && pathname === "/applicants/new") {
     return renderView("new-applicant", {
       title: `${appConfig.companyName} · Add Applicant`,
+      companyName: appConfig.companyName,
+      companySubtitle: appConfig.companySubtitle
+    });
+  }
+
+  if (method === "GET" && pathname === "/kanban") {
+    return renderView("kanban", {
+      title: `${appConfig.companyName} · Kanban`,
       companyName: appConfig.companyName,
       companySubtitle: appConfig.companySubtitle
     });
@@ -172,6 +181,48 @@ export async function handleRequest(request) {
 
       console.error("Failed to update extracted candidate data:", error);
       return jsonResponse({ error: "Unable to update extracted candidate data." }, 500);
+    }
+  }
+
+  const statusUpdateMatch = parseIdSegment(pathname, "/api/candidates/", "/status");
+
+  if (method === "PUT" && statusUpdateMatch) {
+    if (statusUpdateMatch.invalid) {
+      return jsonResponse({ error: "Invalid candidate id." }, 400);
+    }
+
+    try {
+      const payload = await parseJsonBody(request);
+      const nextStatus = typeof payload.status === "string" ? payload.status.trim() : "";
+
+      if (!applicationStatuses.includes(nextStatus)) {
+        return jsonResponse(
+          { error: `Invalid status. Allowed values: ${applicationStatuses.join(", ")}.` },
+          400
+        );
+      }
+
+      const candidateId = statusUpdateMatch.value;
+      const candidate = await getCandidateById(candidateId);
+
+      if (!candidate) {
+        return jsonResponse({ error: "Candidate not found." }, 404);
+      }
+
+      const updatedCandidate = await updateCandidateStatus(candidateId, nextStatus);
+
+      if (!updatedCandidate) {
+        return jsonResponse({ error: "Candidate not found." }, 404);
+      }
+
+      return jsonResponse(toCandidateDto(updatedCandidate));
+    } catch (error) {
+      if (error?.status) {
+        return jsonResponse({ error: error.message }, error.status);
+      }
+
+      console.error("Failed to update candidate status:", error);
+      return jsonResponse({ error: "Unable to update candidate status." }, 500);
     }
   }
 

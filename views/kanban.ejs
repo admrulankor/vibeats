@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= title %></title>
+    <link rel="stylesheet" href="/assets/css/styles.css" />
+    <link rel="stylesheet" href="/assets/css/style.css" />
+    <script type="module" src="/kanban.js"></script>
+  </head>
+  <body class="min-h-screen bg-(--color-bg) text-(--color-text) antialiased">
+    <header class="mx-auto max-w-7xl px-6 py-10">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <a href="/" class="text-sm text-(--color-accent)">← Back to candidate directory</a>
+          <h1 class="mt-2 text-3xl font-semibold tracking-tight">Candidate Status Board</h1>
+          <p class="mt-2 text-sm text-(--color-muted)"><%= companyName %> · Drag cards between columns to update status</p>
+        </div>
+        <a
+          href="/applicants/new"
+          class="inline-flex items-center rounded-xl bg-(--color-accent) px-4 py-2 text-sm font-medium text-white"
+        >
+          Add New Applicant
+        </a>
+      </div>
+    </header>
+
+    <main class="mx-auto max-w-7xl px-6 pb-12" aria-live="polite">
+      <p id="kanban-loading" class="text-sm text-(--color-muted)">Loading candidates...</p>
+      <p id="kanban-error" class="hidden rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"></p>
+      <div
+        id="kanban-empty"
+        class="hidden rounded-xl border border-(--color-border) bg-white px-4 py-6 text-sm text-(--color-muted)"
+      >
+        No candidates found.
+      </div>
+
+      <section
+        id="kanban-columns"
+        class="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
+        aria-label="Candidate status columns"
+      ></section>
+    </main>
+  </body>
+</html>

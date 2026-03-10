@@ -183,4 +183,35 @@ export async function updateCandidateExtractedData(candidateId, payload) {
   `;
 }
 
+export async function updateCandidateStatus(candidateId, status) {
+  const result = await sql`
+    UPDATE candidates
+    SET status = ${status}
+    WHERE id = ${candidateId}
+    RETURNING
+      id,
+      name,
+      role,
+      status,
+      notes,
+      cv_filename,
+      extraction_status,
+      extraction_error,
+      extracted_at,
+      profile_email,
+      profile_phone,
+      profile_location,
+      profile_summary,
+      skills_json,
+      experience_json,
+      education_json,
+      works_json,
+      awards_json,
+      raw_cv_text,
+      created_at
+  `;
+
+  return result[0] || null;
+}
+
 export { sql };

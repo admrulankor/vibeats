@@ -6,10 +6,19 @@ function parseJsonArray(value) {
     return value;
   }
 
-  if (typeof value === "string") {
+  let current = value;
+
+  for (let depth = 0; depth < 3; depth += 1) {
+    if (Array.isArray(current)) {
+      return current;
+    }
+
+    if (typeof current !== "string") {
+      return [];
+    }
+
     try {
-      const parsed = JSON.parse(value);
-      return Array.isArray(parsed) ? parsed : [];
+      current = JSON.parse(current);
     } catch (_error) {
       return [];
     }

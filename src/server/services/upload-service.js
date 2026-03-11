@@ -117,11 +117,11 @@ export async function handleUploadScan(request) {
         ${extracted.phone},
         ${extracted.location},
         ${extracted.summary || notes},
-        ${JSON.stringify(extracted.skills)}::jsonb,
-        ${JSON.stringify(extracted.experience)}::jsonb,
-        ${JSON.stringify(extracted.education)}::jsonb,
-        ${JSON.stringify(portfolio.works)}::jsonb,
-        ${JSON.stringify(portfolio.awards)}::jsonb,
+        ${extracted.skills}::jsonb,
+        ${extracted.experience}::jsonb,
+        ${extracted.education}::jsonb,
+        ${portfolio.works}::jsonb,
+        ${portfolio.awards}::jsonb,
         ${rawText}
       )
       RETURNING id

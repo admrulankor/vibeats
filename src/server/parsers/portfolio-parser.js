@@ -32,6 +32,18 @@ function collectSectionEntries(lines, startHeading, endHeadings) {
   return entries;
 }
 
+function collectSectionEntriesByHeadings(lines, startHeadings, endHeadings) {
+  for (const heading of startHeadings) {
+    const entries = collectSectionEntries(lines, heading, endHeadings);
+
+    if (entries.length) {
+      return entries;
+    }
+  }
+
+  return [];
+}
+
 function mergeYearBasedLines(lines) {
   const entries = [];
   let currentEntry = "";
@@ -61,6 +73,103 @@ function mergeYearBasedLines(lines) {
   return entries;
 }
 
+function isBulletLine(line) {
+  return /^[•●\-–—]/.test(line);
+}
+
+function mergeCreditStyleLines(lines) {
+  const entries = [];
+  let currentEntry = "";
+
+  for (const line of lines) {
+    if (!line) {
+      continue;
+    }
+
+    const startsNewEntry =
+      (/^["“].+["”]/.test(line) || /#\d+/.test(line) || /\(.+\)\s*$/.test(line)) && !isBulletLine(line);
+
+    if (startsNewEntry) {
+      if (currentEntry) {
+        entries.push(currentEntry.trim());
+      }
+
+      currentEntry = line;
+      continue;
+    }
+
+    if (!currentEntry) {
+      currentEntry = line;
+      continue;
+    }
+
+    currentEntry = `${currentEntry} ${line}`;
+  }
+
+  if (currentEntry) {
+    entries.push(currentEntry.trim());
+  }
+
+  return entries;
+}
+
+function mergeWorkLines(lines) {
+  if (lines.some((line) => isYearEntry(line))) {
+    return mergeYearBasedLines(lines);
+  }
+
+  return mergeCreditStyleLines(lines);
+}
+
+function stripBulletPrefix(line) {
+  return line.replace(/^[•●\-–—]\s*/, "").trim();
+}
+
+function mergeBulletBasedLines(lines) {
+  const entries = [];
+  let currentEntry = "";
+
+  for (const line of lines) {
+    if (!line) {
+      continue;
+    }
+
+    if (isBulletLine(line)) {
+      if (currentEntry) {
+        entries.push(currentEntry.trim());
+      }
+
+      currentEntry = stripBulletPrefix(line);
+      continue;
+    }
+
+    if (!currentEntry) {
+      currentEntry = line.trim();
+      continue;
+    }
+
+    currentEntry = `${currentEntry} ${line.trim()}`;
+  }
+
+  if (currentEntry) {
+    entries.push(currentEntry.trim());
+  }
+
+  return entries;
+}
+
+function mergeAwardLines(lines) {
+  if (lines.some((line) => isYearEntry(line))) {
+    return mergeYearBasedLines(lines);
+  }
+
+  if (lines.some((line) => isBulletLine(line))) {
+    return mergeBulletBasedLines(lines);
+  }
+
+  return mergeYearBasedLines(lines);
+}
+
 export function extractPortfolioHighlights(rawText) {
   const lines = sanitizePortfolioLines(rawText);
 
@@ -72,17 +181,29 @@ export function extractPortfolioHighlights(rawText) {
   }
 
   const works = [];
+  const worksBoundaryHeadings = [
+    "awards & honors",
+    "awards & recognition",
+    "education",
+    "professional experience",
+    "experience",
+    "work experience",
+    "employment"
+  ];
   const worksSections = [
     "literary works",
     "standalone novels",
     "comic book runs",
-    "filmography & screenwriting"
+    "filmography & screenwriting",
+    "selected comic book credits",
+    "selected works",
+    "selected credits"
   ];
 
   for (let index = 0; index < worksSections.length; index += 1) {
     const currentHeading = worksSections[index];
     const remainingHeadings = worksSections.slice(index + 1);
-    const endHeadings = [...remainingHeadings, "awards & honors", "education"];
+    const endHeadings = [...remainingHeadings, ...worksBoundaryHeadings];
     const sectionEntries = collectSectionEntries(lines, currentHeading, endHeadings);
 
     if (sectionEntries.length) {
@@ -90,10 +211,14 @@ export function extractPortfolioHighlights(rawText) {
     }
   }
 
-  const awardsLines = collectSectionEntries(lines, "awards & honors", ["education"]);
+  const awardsLines = collectSectionEntriesByHeadings(
+    lines,
+    ["awards & honors", "awards & recognition"],
+    ["education"]
+  );
 
   return {
-    works: mergeYearBasedLines(works),
-    awards: mergeYearBasedLines(awardsLines)
+    works: mergeWorkLines(works),
+    awards: mergeAwardLines(awardsLines)
   };
 }

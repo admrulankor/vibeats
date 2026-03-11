@@ -174,11 +174,11 @@ export async function updateCandidateExtractedData(candidateId, payload) {
       profile_phone = ${payload.profile.phone || null},
       profile_location = ${payload.profile.location || null},
       profile_summary = ${payload.profile.summary || null},
-      skills_json = ${JSON.stringify(payload.skills)}::jsonb,
-      experience_json = ${JSON.stringify(payload.experience)}::jsonb,
-      education_json = ${JSON.stringify(payload.education)}::jsonb,
-      works_json = ${JSON.stringify(payload.works)}::jsonb,
-      awards_json = ${JSON.stringify(payload.awards)}::jsonb
+      skills_json = ${payload.skills}::jsonb,
+      experience_json = ${payload.experience}::jsonb,
+      education_json = ${payload.education}::jsonb,
+      works_json = ${payload.works}::jsonb,
+      awards_json = ${payload.awards}::jsonb
     WHERE id = ${candidateId}
   `;
 }

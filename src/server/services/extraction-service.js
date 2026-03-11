@@ -66,11 +66,11 @@ export async function extractCandidateCvData(candidateId) {
         profile_phone = ${extracted.phone},
         profile_location = ${extracted.location},
         profile_summary = ${extracted.summary},
-        skills_json = ${JSON.stringify(extracted.skills)}::jsonb,
-        experience_json = ${JSON.stringify(extracted.experience)}::jsonb,
-        education_json = ${JSON.stringify(extracted.education)}::jsonb,
-        works_json = ${JSON.stringify(portfolio.works)}::jsonb,
-        awards_json = ${JSON.stringify(portfolio.awards)}::jsonb,
+        skills_json = ${extracted.skills}::jsonb,
+        experience_json = ${extracted.experience}::jsonb,
+        education_json = ${extracted.education}::jsonb,
+        works_json = ${portfolio.works}::jsonb,
+        awards_json = ${portfolio.awards}::jsonb,
         raw_cv_text = ${extracted.rawText}
       WHERE id = ${candidateId}
     `;

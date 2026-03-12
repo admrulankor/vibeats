@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="/assets/css/style.css" />
   </head>
   <body class="min-h-screen bg-(--color-bg) text-(--color-text) antialiased">
+    <%- include('partials/job-board-navbar', { companyName, currentPath: '/jobs', applicant }) %>
     <header class="mx-auto max-w-5xl px-6 py-10">
       <div>
         <a href="/jobs" class="text-sm text-(--color-accent)">← Back to jobs</a>

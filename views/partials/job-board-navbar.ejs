@@ -1,0 +1,27 @@
+<nav class="ats-navbar" aria-label="Job board navigation">
+  <div class="ats-navbar-inner">
+    <a href="/jobs" class="ats-navbar-brand">
+      <span class="ats-navbar-title"><%= companyName %></span>
+      <span class="ats-navbar-subtitle">Job Board</span>
+    </a>
+
+    <div class="ats-navbar-links">
+      <a href="/jobs" class="ats-navbar-link <%= currentPath === '/jobs' ? 'is-active' : '' %>">Jobs</a>
+      <% if (applicant) { %>
+        <a href="/applicant/my-page" class="ats-navbar-link <%= currentPath === '/applicant/my-page' ? 'is-active' : '' %>">My Page</a>
+      <% } %>
+    </div>
+
+    <div class="ats-navbar-user">
+      <% if (applicant) { %>
+        <span class="text-sm text-(--color-muted)"><%= applicant.email %></span>
+        <form method="POST" action="/applicant/logout">
+          <button type="submit" class="rounded-xl border border-(--color-border) px-3 py-1.5 text-sm font-medium text-(--color-muted) hover:bg-gray-50">Sign out</button>
+        </form>
+      <% } else { %>
+        <a href="/applicant/login" class="text-sm font-medium text-(--color-accent)">Sign in</a>
+        <a href="/applicant/signup" class="text-sm font-medium text-(--color-accent)">Create account</a>
+      <% } %>
+    </div>
+  </div>
+</nav>

@@ -155,9 +155,11 @@ export async function handleRequest(request) {
   if (method === "GET" && pathname === "/jobs") {
     try {
       const jobs = await getPublishedJobs();
+      const applicant = await getAuthenticatedApplicant(request);
       return renderView("jobs", {
         title: `${appConfig.companyName} · Job Board`,
         companyName: appConfig.companyName,
+        applicant,
         jobs: jobs.map((job) => toJobDto(job))
       });
     } catch (error) {

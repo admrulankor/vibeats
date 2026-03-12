@@ -20,6 +20,128 @@ function safeArray(value) {
   return Array.isArray(value) ? value : [];
 }
 
+function toReadableLabel(value) {
+  return String(value)
+    .replace(/[_-]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
+function formatDisplayValue(value) {
+  if (value === null || value === undefined) {
+    return "";
+  }
+
+  if (typeof value === "string") {
+    return value;
+  }
+
+  if (typeof value === "number" || typeof value === "boolean") {
+    return String(value);
+  }
+
+  if (Array.isArray(value)) {
+    return value
+      .map((item) => formatDisplayValue(item))
+      .filter(Boolean)
+      .join(" • ");
+  }
+
+  if (typeof value === "object") {
+    const entries = Object.entries(value)
+      .map(([key, nestedValue]) => {
+        const formattedValue = formatDisplayValue(nestedValue);
+        return formattedValue ? `${toReadableLabel(key)}: ${formattedValue}` : "";
+      })
+      .filter(Boolean);
+
+    return entries.join(" • ");
+  }
+
+  return "";
+}
+
+function getPrimaryLabel(item, index) {
+  if (!item || typeof item !== "object") {
+    return `Item ${index + 1}`;
+  }
+
+  const titleKey = ["title", "position", "role", "company", "institution", "name", "project", "award"].find(
+    (key) => typeof item[key] === "string" && item[key].trim()
+  );
+
+  if (titleKey) {
+    return item[titleKey].trim();
+  }
+
+  return `Item ${index + 1}`;
+}
+
+function appendDetailRow(container, label, value) {
+  const row = document.createElement("div");
+  row.className = "details-row";
+
+  const term = document.createElement("span");
+  term.className = "details-row-label";
+  term.textContent = label;
+
+  const description = document.createElement("p");
+  description.className = "details-row-value";
+  description.textContent = value;
+
+  row.append(term, description);
+  container.append(row);
+}
+
+function renderCollection(container, items, emptyLabel) {
+  container.innerHTML = "";
+
+  if (!items.length) {
+    const empty = document.createElement("p");
+    empty.className = "details-empty";
+    empty.textContent = emptyLabel;
+    container.append(empty);
+    return;
+  }
+
+  items.forEach((item, index) => {
+    const card = document.createElement("article");
+    card.className = "details-card";
+
+    if (typeof item !== "object" || item === null) {
+      appendDetailRow(card, `Item ${index + 1}`, formatDisplayValue(item));
+      container.append(card);
+      return;
+    }
+
+    const primaryLabel = getPrimaryLabel(item, index);
+    const heading = document.createElement("h3");
+    heading.className = "details-card-title";
+    heading.textContent = primaryLabel;
+    card.append(heading);
+
+    let hasRows = false;
+
+    Object.entries(item).forEach(([key, value]) => {
+      const formattedValue = formatDisplayValue(value);
+
+      if (!formattedValue || formattedValue === primaryLabel) {
+        return;
+      }
+
+      appendDetailRow(card, toReadableLabel(key), formattedValue);
+      hasRows = true;
+    });
+
+    if (!hasRows) {
+      appendDetailRow(card, "Details", "No additional details provided.");
+    }
+
+    container.append(card);
+  });
+}
+
 function formatExtractionStatus(candidate) {
   if (!candidate.extraction_status) {
     return "idle";
@@ -77,8 +199,8 @@ export function renderCandidate() {
   elements.skillsInput.value = skills.join(", ");
   renderSkills(skills);
 
-  elements.experienceJson.value = JSON.stringify(safeArray(candidate.experience), null, 2);
-  elements.educationJson.value = JSON.stringify(safeArray(candidate.education), null, 2);
-  elements.worksJson.value = JSON.stringify(safeArray(candidate.works), null, 2);
-  elements.awardsJson.value = JSON.stringify(safeArray(candidate.awards), null, 2);
+  renderCollection(elements.experienceList, safeArray(candidate.experience), "No experience records available.");
+  renderCollection(elements.educationList, safeArray(candidate.education), "No education records available.");
+  renderCollection(elements.worksList, safeArray(candidate.works), "No work samples available.");
+  renderCollection(elements.awardsList, safeArray(candidate.awards), "No awards listed.");
 }

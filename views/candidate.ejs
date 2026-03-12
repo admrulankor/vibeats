@@ -9,22 +9,13 @@
     <script type="module" src="/candidate.js"></script>
   </head>
   <body class="min-h-screen bg-(--color-bg) text-(--color-text) antialiased" data-candidate-id="<%= candidateId %>">
+    <%- include('partials/navbar') %>
     <header class="mx-auto max-w-5xl px-6 py-10">
       <div class="flex flex-wrap items-start justify-between gap-4">
         <div>
           <a href="/" class="text-sm text-(--color-accent)">← Back to candidate directory</a>
           <h1 id="candidate-name" class="mt-2 text-3xl font-semibold tracking-tight">Candidate</h1>
           <p id="candidate-role" class="mt-2 text-sm text-(--color-muted)">Loading...</p>
-        </div>
-        <div class="flex items-center gap-3">
-          <% if (user.role === 'admin') { %>
-            <a href="/admin/users" class="text-sm text-(--color-accent)">Users</a>
-          <% } %>
-          <span class="text-sm text-(--color-muted)"><%= user.username %></span>
-          <span class="rounded-full px-2 py-0.5 text-xs font-medium <%- user.role === 'admin' ? 'bg-violet-100 text-violet-700' : 'bg-sky-100 text-sky-700' %>"><%= user.role %></span>
-          <form method="POST" action="/logout">
-            <button type="submit" class="rounded-xl border border-(--color-border) px-3 py-1.5 text-sm font-medium text-(--color-muted) hover:bg-gray-50">Sign out</button>
-          </form>
         </div>
       </div>
     </header>
@@ -76,25 +67,25 @@
 
       <section class="mt-6 details-layout">
         <article class="rounded-2xl border border-(--color-border) bg-white p-5 shadow-sm">
-          <h2 class="text-sm font-medium uppercase tracking-wide text-(--color-muted)">Experience (JSON)</h2>
-          <textarea id="experience-json" class="details-input details-json mt-4" rows="10"></textarea>
+          <h2 class="text-sm font-medium uppercase tracking-wide text-(--color-muted)">Experience</h2>
+          <div id="experience-list" class="details-collection mt-4"></div>
         </article>
 
         <article class="rounded-2xl border border-(--color-border) bg-white p-5 shadow-sm">
-          <h2 class="text-sm font-medium uppercase tracking-wide text-(--color-muted)">Education (JSON)</h2>
-          <textarea id="education-json" class="details-input details-json mt-4" rows="10"></textarea>
+          <h2 class="text-sm font-medium uppercase tracking-wide text-(--color-muted)">Education</h2>
+          <div id="education-list" class="details-collection mt-4"></div>
         </article>
       </section>
 
       <section class="mt-6 details-layout">
         <article class="rounded-2xl border border-(--color-border) bg-white p-5 shadow-sm">
-          <h2 class="text-sm font-medium uppercase tracking-wide text-(--color-muted)">Works (JSON)</h2>
-          <textarea id="works-json" class="details-input details-json mt-4" rows="10"></textarea>
+          <h2 class="text-sm font-medium uppercase tracking-wide text-(--color-muted)">Works</h2>
+          <div id="works-list" class="details-collection mt-4"></div>
         </article>
 
         <article class="rounded-2xl border border-(--color-border) bg-white p-5 shadow-sm">
-          <h2 class="text-sm font-medium uppercase tracking-wide text-(--color-muted)">Awards (JSON)</h2>
-          <textarea id="awards-json" class="details-input details-json mt-4" rows="10"></textarea>
+          <h2 class="text-sm font-medium uppercase tracking-wide text-(--color-muted)">Awards</h2>
+          <div id="awards-list" class="details-collection mt-4"></div>
         </article>
       </section>
 

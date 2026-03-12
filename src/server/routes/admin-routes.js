@@ -26,6 +26,8 @@ export async function handleGetAdminUsers(request) {
   return renderView("admin/users", {
     title: `${appConfig.companyName} · User Management`,
     companyName: appConfig.companyName,
+    companySubtitle: appConfig.companySubtitle,
+    currentPath: "/admin/users",
     user,
     users,
     flashMessage,

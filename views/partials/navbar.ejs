@@ -1,0 +1,27 @@
+<nav class="ats-navbar" aria-label="Primary navigation">
+  <div class="ats-navbar-inner">
+    <a href="/" class="ats-navbar-brand">
+      <span class="ats-navbar-title"><%= companyName %></span>
+      <% if (companySubtitle) { %>
+        <span class="ats-navbar-subtitle"><%= companySubtitle %></span>
+      <% } %>
+    </a>
+
+    <div class="ats-navbar-links">
+      <a href="/" class="ats-navbar-link <%= currentPath === '/' || currentPath === '/candidates' ? 'is-active' : '' %>">Candidates</a>
+      <a href="/kanban" class="ats-navbar-link <%= currentPath === '/kanban' ? 'is-active' : '' %>">Kanban</a>
+      <a href="/applicants/new" class="ats-navbar-link <%= currentPath === '/applicants/new' ? 'is-active' : '' %>">Add Applicant</a>
+      <% if (user.role === 'admin') { %>
+        <a href="/admin/users" class="ats-navbar-link <%= currentPath === '/admin/users' ? 'is-active' : '' %>">Users</a>
+      <% } %>
+    </div>
+
+    <div class="ats-navbar-user">
+      <span class="text-sm text-(--color-muted)"><%= user.username %></span>
+      <span class="rounded-full px-2 py-0.5 text-xs font-medium <%- user.role === 'admin' ? 'bg-violet-100 text-violet-700' : 'bg-sky-100 text-sky-700' %>"><%= user.role %></span>
+      <form method="POST" action="/logout">
+        <button type="submit" class="rounded-xl border border-(--color-border) px-3 py-1.5 text-sm font-medium text-(--color-muted) hover:bg-gray-50">Sign out</button>
+      </form>
+    </div>
+  </div>
+</nav>

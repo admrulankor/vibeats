@@ -9,6 +9,7 @@
     <script type="module" src="/kanban.js"></script>
   </head>
   <body class="min-h-screen bg-(--color-bg) text-(--color-text) antialiased">
+    <%- include('partials/navbar') %>
     <header class="mx-auto w-full px-4 py-6 sm:px-6 sm:py-10">
       <div class="flex flex-wrap items-center justify-between gap-3">
         <div class="min-w-0">
@@ -17,14 +18,6 @@
           <p class="mt-2 max-w-2xl text-xs text-(--color-muted) sm:text-sm"><%= companyName %> · Drag cards between columns to update status</p>
         </div>
         <div class="flex flex-wrap items-center gap-2">
-          <% if (user.role === 'admin') { %>
-            <a href="/admin/users" class="text-sm text-(--color-accent)">Users</a>
-          <% } %>
-          <span class="text-sm text-(--color-muted)"><%= user.username %></span>
-          <span class="rounded-full px-2 py-0.5 text-xs font-medium <%- user.role === 'admin' ? 'bg-violet-100 text-violet-700' : 'bg-sky-100 text-sky-700' %>"><%= user.role %></span>
-          <form method="POST" action="/logout">
-            <button type="submit" class="rounded-xl border border-(--color-border) px-3 py-1.5 text-sm font-medium text-(--color-muted) hover:bg-gray-50">Sign out</button>
-          </form>
           <a
             href="/applicants/new"
             class="inline-flex items-center justify-center rounded-xl bg-(--color-accent) px-4 py-2 text-sm font-medium text-white"

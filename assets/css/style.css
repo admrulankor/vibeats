@@ -40,6 +40,78 @@ a:hover {
   background: var(--color-accent-soft);
 }
 
+.ats-navbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  border-bottom: 1px solid color-mix(in oklab, var(--color-border) 88%, #ffffff);
+  background: color-mix(in oklab, var(--color-bg) 84%, #ffffff);
+  backdrop-filter: blur(8px);
+}
+
+.ats-navbar-inner {
+  max-width: 80rem;
+  margin: 0 auto;
+  padding: 12px 16px;
+  display: grid;
+  gap: 10px;
+  align-items: center;
+}
+
+.ats-navbar-brand {
+  display: inline-flex;
+  flex-direction: column;
+  text-decoration: none;
+}
+
+.ats-navbar-title {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.ats-navbar-subtitle {
+  margin-top: 1px;
+  color: var(--color-muted);
+  font-size: 12px;
+}
+
+.ats-navbar-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.ats-navbar-link {
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  color: var(--color-muted);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 6px 10px;
+}
+
+.ats-navbar-link:hover {
+  color: var(--color-accent);
+  background: color-mix(in oklab, var(--color-accent-soft) 20%, transparent);
+}
+
+.ats-navbar-link.is-active {
+  color: color-mix(in oklab, var(--color-accent) 88%, var(--color-text));
+  border-color: color-mix(in oklab, var(--color-accent-soft) 55%, var(--color-border));
+  background: color-mix(in oklab, var(--color-accent-soft) 30%, #ffffff);
+}
+
+.ats-navbar-user {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+}
+
 main > section,
 .details-layout > article,
 #candidates-list > li {
@@ -159,6 +231,59 @@ main > section,
   min-height: 120px;
 }
 
+.details-collection {
+  display: grid;
+  gap: 10px;
+}
+
+.details-card {
+  border: 1px solid color-mix(in oklab, var(--color-border) 84%, #ffffff);
+  border-radius: var(--radius-md);
+  background: color-mix(in oklab, #ffffff 82%, var(--color-chip-bg));
+  padding: 12px;
+}
+
+.details-card-title {
+  margin: 0 0 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.details-row {
+  display: grid;
+  gap: 2px;
+}
+
+.details-row + .details-row {
+  margin-top: 8px;
+}
+
+.details-row-label {
+  color: var(--color-muted);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  font-weight: 600;
+}
+
+.details-row-value {
+  margin: 0;
+  font-size: 13px;
+  color: var(--color-text);
+  white-space: pre-wrap;
+}
+
+.details-empty {
+  margin: 0;
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-md);
+  background: color-mix(in oklab, #ffffff 88%, var(--color-bg));
+  color: var(--color-muted);
+  font-size: 13px;
+  padding: 10px 12px;
+}
+
 .skills-list {
   display: flex;
   flex-wrap: wrap;
@@ -178,5 +303,20 @@ main > section,
 @media (max-width: 900px) {
   .details-layout {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (min-width: 860px) {
+  .ats-navbar-inner {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    gap: 14px;
+  }
+
+  .ats-navbar-links {
+    justify-content: center;
+  }
+
+  .ats-navbar-user {
+    justify-content: flex-end;
   }
 }

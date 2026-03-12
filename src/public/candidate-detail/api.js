@@ -1,22 +1,8 @@
 import { candidateId, elements, state } from "./state.js";
 import { clearError, readSkillsInput, renderCandidate, setBusy, showError } from "./ui.js";
 
-function parseJsonArrayField(value, fieldLabel) {
-  try {
-    const parsed = JSON.parse(value || "[]");
-
-    if (!Array.isArray(parsed)) {
-      throw new Error(`${fieldLabel} must be a JSON array.`);
-    }
-
-    return parsed;
-  } catch (error) {
-    if (error instanceof Error) {
-      throw error;
-    }
-
-    throw new Error(`${fieldLabel} must be valid JSON.`);
-  }
+function safeArray(value) {
+  return Array.isArray(value) ? value : [];
 }
 
 export async function fetchCandidate() {
@@ -65,10 +51,10 @@ export async function saveExtractedData() {
   clearError();
 
   try {
-    const experience = parseJsonArrayField(elements.experienceJson.value, "Experience");
-    const education = parseJsonArrayField(elements.educationJson.value, "Education");
-    const works = parseJsonArrayField(elements.worksJson.value, "Works");
-    const awards = parseJsonArrayField(elements.awardsJson.value, "Awards");
+    const experience = safeArray(state.candidate?.experience);
+    const education = safeArray(state.candidate?.education);
+    const works = safeArray(state.candidate?.works);
+    const awards = safeArray(state.candidate?.awards);
 
     const payload = {
       profile: {

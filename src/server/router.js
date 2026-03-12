@@ -83,6 +83,7 @@ export async function handleRequest(request) {
       title: appConfig.companyName,
       companyName: appConfig.companyName,
       companySubtitle: appConfig.companySubtitle,
+      currentPath: pathname,
       user
     });
   }
@@ -92,6 +93,7 @@ export async function handleRequest(request) {
       title: `${appConfig.companyName} · Add Applicant`,
       companyName: appConfig.companyName,
       companySubtitle: appConfig.companySubtitle,
+      currentPath: pathname,
       applicationStatuses,
       user
     });
@@ -102,6 +104,7 @@ export async function handleRequest(request) {
       title: `${appConfig.companyName} · Kanban`,
       companyName: appConfig.companyName,
       companySubtitle: appConfig.companySubtitle,
+      currentPath: pathname,
       applicationStatuses,
       user
     });
@@ -118,6 +121,7 @@ export async function handleRequest(request) {
       title: `${appConfig.companyName} · Candidate`,
       companyName: appConfig.companyName,
       companySubtitle: appConfig.companySubtitle,
+      currentPath: "/candidates",
       candidateId: candidatePageMatch.value,
       user
     });

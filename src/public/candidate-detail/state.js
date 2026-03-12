@@ -19,8 +19,8 @@ export const elements = {
   summary: document.getElementById("profile-summary"),
   skillsInput: document.getElementById("skills-input"),
   skillsList: document.getElementById("skills-list"),
-  experienceJson: document.getElementById("experience-json"),
-  educationJson: document.getElementById("education-json"),
-  worksJson: document.getElementById("works-json"),
-  awardsJson: document.getElementById("awards-json")
+  experienceList: document.getElementById("experience-list"),
+  educationList: document.getElementById("education-list"),
+  worksList: document.getElementById("works-list"),
+  awardsList: document.getElementById("awards-list")
 };

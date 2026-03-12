@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= title %></title>
+    <link rel="stylesheet" href="/assets/css/styles.css" />
+    <link rel="stylesheet" href="/assets/css/style.css" />
+  </head>
+  <body class="min-h-screen bg-(--color-bg) text-(--color-text) antialiased flex items-center justify-center">
+    <div class="w-full max-w-sm px-6">
+      <div class="mb-8 text-center">
+        <h1 class="text-2xl font-semibold tracking-tight"><%= companyName %></h1>
+        <p class="mt-2 text-sm text-(--color-muted)">ATS &middot; Sign in to continue</p>
+      </div>
+
+      <section class="rounded-2xl border border-(--color-border) bg-white p-6 shadow-sm">
+        <% if (error) { %>
+          <p class="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"><%= error %></p>
+        <% } %>
+
+        <form method="POST" action="/login" class="grid gap-4">
+          <label class="space-y-1">
+            <span class="block text-xs font-medium text-(--color-muted)">Username</span>
+            <input
+              name="username"
+              type="text"
+              required
+              autocomplete="username"
+              class="w-full rounded-xl border border-(--color-border) bg-white px-3 py-2 text-sm outline-none transition focus:border-(--color-accent) focus:ring-2 focus:ring-(--color-accent-soft)"
+            />
+          </label>
+
+          <label class="space-y-1">
+            <span class="block text-xs font-medium text-(--color-muted)">Password</span>
+            <input
+              name="password"
+              type="password"
+              required
+              autocomplete="current-password"
+              class="w-full rounded-xl border border-(--color-border) bg-white px-3 py-2 text-sm outline-none transition focus:border-(--color-accent) focus:ring-2 focus:ring-(--color-accent-soft)"
+            />
+          </label>
+
+          <button
+            type="submit"
+            class="w-full rounded-xl bg-(--color-accent) px-4 py-2 text-sm font-medium text-white"
+          >
+            Sign in
+          </button>
+        </form>
+      </section>
+    </div>
+  </body>
+</html>

@@ -10,9 +10,23 @@
   </head>
   <body class="min-h-screen bg-(--color-bg) text-(--color-text) antialiased">
     <header class="mx-auto max-w-5xl px-6 py-10">
-      <a href="/" class="text-sm text-(--color-accent)">← Back to candidate directory</a>
-      <h1 class="mt-2 text-3xl font-semibold tracking-tight">Add New Applicant</h1>
-      <p class="mt-2 text-sm text-(--color-muted)"><%= companyName %> · Upload and scan CV</p>
+      <div class="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <a href="/" class="text-sm text-(--color-accent)">← Back to candidate directory</a>
+          <h1 class="mt-2 text-3xl font-semibold tracking-tight">Add New Applicant</h1>
+          <p class="mt-2 text-sm text-(--color-muted)"><%= companyName %> &middot; Upload and scan CV</p>
+        </div>
+        <div class="flex items-center gap-3">
+          <% if (user.role === 'admin') { %>
+            <a href="/admin/users" class="text-sm text-(--color-accent)">Users</a>
+          <% } %>
+          <span class="text-sm text-(--color-muted)"><%= user.username %></span>
+          <span class="rounded-full px-2 py-0.5 text-xs font-medium <%- user.role === 'admin' ? 'bg-violet-100 text-violet-700' : 'bg-sky-100 text-sky-700' %>"><%= user.role %></span>
+          <form method="POST" action="/logout">
+            <button type="submit" class="rounded-xl border border-(--color-border) px-3 py-1.5 text-sm font-medium text-(--color-muted) hover:bg-gray-50">Sign out</button>
+          </form>
+        </div>
+      </div>
     </header>
 
     <main class="mx-auto max-w-5xl px-6 pb-12">

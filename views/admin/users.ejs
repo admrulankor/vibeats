@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= title %></title>
+    <link rel="stylesheet" href="/assets/css/styles.css" />
+    <link rel="stylesheet" href="/assets/css/style.css" />
+  </head>
+  <body class="min-h-screen bg-(--color-bg) text-(--color-text) antialiased">
+    <header class="mx-auto max-w-5xl px-6 py-10">
+      <div class="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <a href="/" class="text-sm text-(--color-accent)">← Back to candidate directory</a>
+          <h1 class="mt-2 text-3xl font-semibold tracking-tight">User Management</h1>
+          <p class="mt-2 text-sm text-(--color-muted)"><%= companyName %> &middot; ATS access control</p>
+        </div>
+        <div class="flex items-center gap-3">
+          <span class="text-sm text-(--color-muted)"><%= user.username %></span>
+          <span class="rounded-full px-2 py-0.5 text-xs font-medium <%- user.role === 'admin' ? 'bg-violet-100 text-violet-700' : 'bg-sky-100 text-sky-700' %>"><%= user.role %></span>
+          <form method="POST" action="/logout">
+            <button type="submit" class="rounded-xl border border-(--color-border) px-3 py-1.5 text-sm font-medium text-(--color-muted) hover:bg-gray-50">Sign out</button>
+          </form>
+        </div>
+      </div>
+    </header>
+
+    <main class="mx-auto max-w-5xl px-6 pb-12">
+      <% if (flashMessage) { %>
+        <p class="mb-4 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700"><%= flashMessage %></p>
+      <% } %>
+      <% if (flashError) { %>
+        <p class="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"><%= flashError %></p>
+      <% } %>
+
+      <section class="rounded-2xl border border-(--color-border) bg-white p-5 shadow-sm">
+        <h2 class="text-sm font-medium uppercase tracking-wide text-(--color-muted)">ATS Users</h2>
+        <% if (users.length === 0) { %>
+          <p class="mt-4 text-sm text-(--color-muted)">No users found.</p>
+        <% } else { %>
+          <ul class="mt-4 divide-y divide-(--color-border)">
+            <% users.forEach(function(u) { %>
+              <li class="flex flex-wrap items-center justify-between gap-3 py-3">
+                <div class="flex items-center gap-3">
+                  <span class="text-sm font-medium"><%= u.username %></span>
+                  <span class="rounded-full px-2 py-0.5 text-xs font-medium <%- u.role === 'admin' ? 'bg-violet-100 text-violet-700' : 'bg-sky-100 text-sky-700' %>"><%= u.role %></span>
+                </div>
+                <div class="flex items-center gap-3">
+                  <span class="text-xs text-(--color-muted)"><%= new Date(u.created_at).toLocaleDateString() %></span>
+                  <% if (u.id !== user.id) { %>
+                    <form method="POST" action="/admin/users/<%= u.id %>/delete" onsubmit="return confirm('Delete ' + '<%= u.username %>' + '?')">
+                      <button type="submit" class="rounded-xl border border-red-200 px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50">Delete</button>
+                    </form>
+                  <% } else { %>
+                    <span class="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-(--color-muted)">you</span>
+                  <% } %>
+                </div>
+              </li>
+            <% }) %>
+          </ul>
+        <% } %>
+      </section>
+
+      <section class="mt-6 rounded-2xl border border-(--color-border) bg-white p-5 shadow-sm">
+        <h2 class="text-sm font-medium uppercase tracking-wide text-(--color-muted)">Add User</h2>
+        <form method="POST" action="/admin/users" class="mt-4 grid gap-3 sm:grid-cols-3">
+          <label class="space-y-1">
+            <span class="block text-xs font-medium text-(--color-muted)">Username</span>
+            <input
+              name="username"
+              type="text"
+              required
+              autocomplete="off"
+              class="w-full rounded-xl border border-(--color-border) bg-white px-3 py-2 text-sm outline-none transition focus:border-(--color-accent) focus:ring-2 focus:ring-(--color-accent-soft)"
+            />
+          </label>
+
+          <label class="space-y-1">
+            <span class="block text-xs font-medium text-(--color-muted)">Password</span>
+            <input
+              name="password"
+              type="password"
+              required
+              autocomplete="new-password"
+              class="w-full rounded-xl border border-(--color-border) bg-white px-3 py-2 text-sm outline-none transition focus:border-(--color-accent) focus:ring-2 focus:ring-(--color-accent-soft)"
+            />
+          </label>
+
+          <label class="space-y-1">
+            <span class="block text-xs font-medium text-(--color-muted)">Role</span>
+            <select
+              name="role"
+              class="w-full rounded-xl border border-(--color-border) bg-white px-3 py-2 text-sm outline-none transition focus:border-(--color-accent) focus:ring-2 focus:ring-(--color-accent-soft)"
+            >
+              <option value="user">user</option>
+              <option value="admin">admin</option>
+            </select>
+          </label>
+
+          <div class="sm:col-span-3">
+            <button
+              type="submit"
+              class="inline-flex items-center rounded-xl bg-(--color-accent) px-4 py-2 text-sm font-medium text-white"
+            >
+              Create User
+            </button>
+          </div>
+        </form>
+      </section>
+    </main>
+  </body>
+</html>

@@ -13,17 +13,77 @@ import { jsonResponse, textResponse } from "./utils/http.js";
 import { parseIdSegment, parseJsonBody } from "./utils/request.js";
 import { maybeServeFile, safeStaticPath } from "./utils/static.js";
 import { renderView } from "./views.js";
+import { requireAuth } from "./auth/auth-middleware.js";
+import { handleGetLogin, handlePostLogin, handlePostLogout } from "./routes/auth-routes.js";
+import {
+  handleGetAdminUsers,
+  handlePostAdminCreateUser,
+  handlePostAdminDeleteUser
+} from "./routes/admin-routes.js";
 
 export async function handleRequest(request) {
   const url = new URL(request.url);
   const pathname = decodeURIComponent(url.pathname);
   const method = request.method.toUpperCase();
 
+  // ── Public routes (no auth required) ───────────────────────────────────────
+
+  if (method === "GET" && pathname === "/login") {
+    return handleGetLogin(request);
+  }
+
+  if (method === "POST" && pathname === "/login") {
+    return handlePostLogin(request);
+  }
+
+  if (method === "POST" && pathname === "/logout") {
+    return handlePostLogout(request);
+  }
+
+  if (pathname.startsWith("/assets/")) {
+    const assetPath = safeStaticPath(directories.assets, pathname.slice("/assets/".length));
+    const assetResponse = await maybeServeFile(assetPath);
+    if (assetResponse) return assetResponse;
+  }
+
+  if (method === "GET") {
+    const filePath = safeStaticPath(directories.public, pathname);
+    const fileResponse = await maybeServeFile(filePath);
+    if (fileResponse) return fileResponse;
+  }
+
+  // ── Auth wall ───────────────────────────────────────────────────────────────
+
+  const authResult = await requireAuth(request);
+  if (authResult instanceof Response) return authResult;
+  const user = authResult;
+
+  // ── Admin-only routes ───────────────────────────────────────────────────────
+
+  if (method === "GET" && pathname === "/admin/users") {
+    return handleGetAdminUsers(request);
+  }
+
+  if (method === "POST" && pathname === "/admin/users") {
+    return handlePostAdminCreateUser(request);
+  }
+
+  const adminDeleteMatch = parseIdSegment(pathname, "/admin/users/", "/delete");
+  if (method === "POST" && adminDeleteMatch) {
+    if (adminDeleteMatch.invalid) {
+      return new Response(null, { status: 302, headers: { Location: "/admin/users" } });
+    }
+    return handlePostAdminDeleteUser(request, adminDeleteMatch.value);
+  }
+
+  // ── Authenticated page routes ───────────────────────────────────────────────
+
   if (method === "GET" && pathname === "/") {
     return renderView("index", {
       title: appConfig.companyName,
       companyName: appConfig.companyName,
-      companySubtitle: appConfig.companySubtitle
+      companySubtitle: appConfig.companySubtitle,
+      user
     });
   }
 
@@ -32,7 +92,8 @@ export async function handleRequest(request) {
       title: `${appConfig.companyName} · Add Applicant`,
       companyName: appConfig.companyName,
       companySubtitle: appConfig.companySubtitle,
-      applicationStatuses
+      applicationStatuses,
+      user
     });
   }
 
@@ -41,7 +102,8 @@ export async function handleRequest(request) {
       title: `${appConfig.companyName} · Kanban`,
       companyName: appConfig.companyName,
       companySubtitle: appConfig.companySubtitle,
-      applicationStatuses
+      applicationStatuses,
+      user
     });
   }
 
@@ -56,9 +118,12 @@ export async function handleRequest(request) {
       title: `${appConfig.companyName} · Candidate`,
       companyName: appConfig.companyName,
       companySubtitle: appConfig.companySubtitle,
-      candidateId: candidatePageMatch.value
+      candidateId: candidatePageMatch.value,
+      user
     });
   }
+
+  // ── Authenticated API routes ────────────────────────────────────────────────
 
   if (method === "GET" && pathname === "/api/candidates") {
     try {
@@ -225,24 +290,6 @@ export async function handleRequest(request) {
 
       console.error("Failed to update candidate status:", error);
       return jsonResponse({ error: "Unable to update candidate status." }, 500);
-    }
-  }
-
-  if (pathname.startsWith("/assets/")) {
-    const assetPath = safeStaticPath(directories.assets, pathname.slice("/assets/".length));
-    const assetResponse = await maybeServeFile(assetPath);
-
-    if (assetResponse) {
-      return assetResponse;
-    }
-  }
-
-  if (method === "GET") {
-    const filePath = safeStaticPath(directories.public, pathname);
-    const fileResponse = await maybeServeFile(filePath);
-
-    if (fileResponse) {
-      return fileResponse;
     }
   }
 

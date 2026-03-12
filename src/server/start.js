@@ -1,11 +1,24 @@
 import { autoExtractionIntervalMs, port } from "./config/app-config.js";
 import { ensureCandidateColumnsAndSync } from "./data/candidates-repository.js";
+import { ensureAuthTables } from "./db/migrations.js";
+import { countAdmins } from "./data/users-repository.js";
+import { deleteExpiredSessions } from "./auth/sessions-repository.js";
 import { runAutoExtractionPass } from "./services/extraction-service.js";
 import { jsonResponse } from "./utils/http.js";
 import { handleRequest } from "./router.js";
 
 export async function startServer() {
   try {
+    await ensureAuthTables();
+    await deleteExpiredSessions();
+
+    const adminCount = await countAdmins();
+    if (adminCount === 0) {
+      console.warn(
+        "[auth] No admin accounts exist. Set ADMIN_USERNAME and ADMIN_PASSWORD env vars and run: bun seed.js"
+      );
+    }
+
     await ensureCandidateColumnsAndSync();
     await runAutoExtractionPass();
 

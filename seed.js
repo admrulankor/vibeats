@@ -1,7 +1,26 @@
 import { sql } from "./db.js";
 import { APPLICATION_STATUSES } from "./src/shared/application-statuses.js";
+import { ensureAuthTables } from "./src/server/db/migrations.js";
 
 async function seed() {
+  await ensureAuthTables();
+
+  // Bootstrap initial admin account from env vars (idempotent)
+  const adminUsername = Bun.env.ADMIN_USERNAME?.trim();
+  const adminPassword = Bun.env.ADMIN_PASSWORD;
+  if (adminUsername && adminPassword) {
+    const existing = await sql`SELECT id FROM ats_users WHERE username = ${adminUsername} LIMIT 1`;
+    if (!existing[0]) {
+      const hash = await Bun.password.hash(adminPassword);
+      await sql`INSERT INTO ats_users (username, password_hash, role) VALUES (${adminUsername}, ${hash}, 'admin')`;
+      console.log(`Admin account created: ${adminUsername}`);
+    } else {
+      console.log(`Admin account already exists: ${adminUsername}`);
+    }
+  } else {
+    console.log("Skipping admin bootstrap: ADMIN_USERNAME / ADMIN_PASSWORD not set.");
+  }
+
   await sql`DROP TABLE IF EXISTS candidates`;
   await sql`DROP TABLE IF EXISTS application_statuses`;
 

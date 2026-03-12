@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= title %></title>
+    <link rel="stylesheet" href="/assets/css/styles.css" />
+    <link rel="stylesheet" href="/assets/css/style.css" />
+  </head>
+  <body class="min-h-screen bg-(--color-bg) text-(--color-text) antialiased">
+    <header class="mx-auto max-w-5xl px-6 py-10">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h1 class="text-3xl font-semibold tracking-tight">Job Board</h1>
+          <p class="mt-2 text-sm text-(--color-muted)"><%= companyName %> · Open roles</p>
+        </div>
+        <div class="flex items-center gap-3">
+          <a href="/applicant/login" class="text-sm font-medium text-(--color-accent)">Applicant Sign In</a>
+          <a href="/applicant/signup" class="text-sm font-medium text-(--color-accent)">Create Account</a>
+        </div>
+      </div>
+    </header>
+
+    <main class="mx-auto max-w-5xl px-6 pb-12">
+      <section class="grid gap-4 sm:grid-cols-2">
+        <% if (!jobs.length) { %>
+          <article class="rounded-2xl border border-(--color-border) bg-white p-5 shadow-sm sm:col-span-2">
+            <p class="text-sm text-(--color-muted)">No published jobs right now. Please check again later.</p>
+          </article>
+        <% } %>
+
+        <% jobs.forEach(function(job) { %>
+          <article class="rounded-2xl border border-(--color-border) bg-white p-5 shadow-sm">
+            <h2 class="text-lg font-semibold"><%= job.title %></h2>
+            <p class="mt-1 text-sm text-(--color-muted)"><%= job.location || 'Location TBD' %> · <%= job.employmentType || 'Employment type TBD' %></p>
+            <% if (job.intro) { %>
+              <p class="mt-3 text-sm leading-relaxed"><%= job.intro %></p>
+            <% } %>
+            <a href="/jobs/<%= job.id %>" class="mt-4 inline-flex text-sm font-medium text-(--color-accent)">View & Apply</a>
+          </article>
+        <% }) %>
+      </section>
+    </main>
+  </body>
+</html>

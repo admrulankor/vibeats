@@ -25,21 +25,21 @@ export async function handlePostLogin(request) {
     username = (formData.get("username") ?? "").toString().trim();
     password = (formData.get("password") ?? "").toString();
   } catch {
-    return new Response(null, { status: 302, headers: { Location: "/login?error=invalid" } });
+    return new Response(null, { status: 302, headers: { Location: "/backoffice/login?error=invalid" } });
   }
 
   if (!username || !password) {
-    return new Response(null, { status: 302, headers: { Location: "/login?error=invalid" } });
+    return new Response(null, { status: 302, headers: { Location: "/backoffice/login?error=invalid" } });
   }
 
   const user = await getUserByUsername(username);
   if (!user) {
-    return new Response(null, { status: 302, headers: { Location: "/login?error=invalid" } });
+    return new Response(null, { status: 302, headers: { Location: "/backoffice/login?error=invalid" } });
   }
 
   const valid = await Bun.password.verify(password, user.password_hash);
   if (!valid) {
-    return new Response(null, { status: 302, headers: { Location: "/login?error=invalid" } });
+    return new Response(null, { status: 302, headers: { Location: "/backoffice/login?error=invalid" } });
   }
 
   const expiresAt = new Date(Date.now() + SESSION_TTL_HOURS * 60 * 60 * 1000);
@@ -48,7 +48,7 @@ export async function handlePostLogin(request) {
   return new Response(null, {
     status: 302,
     headers: {
-      Location: "/",
+      Location: "/backoffice",
       "Set-Cookie": makeSessionCookieHeader(sessionId, expiresAt)
     }
   });
@@ -63,7 +63,7 @@ export async function handlePostLogout(request) {
   return new Response(null, {
     status: 302,
     headers: {
-      Location: "/login",
+      Location: "/backoffice/login",
       "Set-Cookie": clearSessionCookieHeader()
     }
   });

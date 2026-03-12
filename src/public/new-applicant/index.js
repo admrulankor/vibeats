@@ -26,7 +26,7 @@ async function submitNewApplicant(event) {
   setMessage("Uploading and scanning CV...");
 
   try {
-    const response = await fetch("/api/candidates/upload-scan", {
+    const response = await fetch("/backoffice/api/candidates/upload-scan", {
       method: "POST",
       body: formData
     });
@@ -40,7 +40,7 @@ async function submitNewApplicant(event) {
     setMessage(`Created ${payload.name}. Redirecting to candidate details...`);
 
     window.setTimeout(() => {
-      window.location.href = `/candidates/${payload.id}`;
+      window.location.href = `/backoffice/candidates/${payload.id}`;
     }, 500);
   } catch (error) {
     setMessage(error instanceof Error ? error.message : "Upload failed.", true);

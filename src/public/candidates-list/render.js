@@ -51,7 +51,7 @@ export function renderCards() {
       <p class="mt-3 inline-flex rounded-full bg-(--color-chip-bg) px-2.5 py-1 text-xs font-medium text-(--color-chip-text)">${candidate.status}</p>
       <p class="mt-3 text-xs text-(--color-muted)">CV extraction: ${candidate.extraction_status || "idle"}</p>
       <p class="mt-3 text-sm leading-relaxed">${candidate.notes}</p>
-      <a href="/candidates/${candidate.id}" class="mt-3 inline-flex text-sm font-medium text-(--color-accent)">Open Candidate Details</a>
+      <a href="/backoffice/candidates/${candidate.id}" class="mt-3 inline-flex text-sm font-medium text-(--color-accent)">Open Candidate Details</a>
       ${candidate.cv_url ? `<a href="${candidate.cv_url}" target="_blank" rel="noopener noreferrer" class="mt-3 inline-flex text-sm font-medium text-(--color-accent) hover:underline">Browse CV (PDF)</a>` : ""}
       <p class="mt-3 text-xs text-(--color-muted)">${formatDate(candidate.created_at)}</p>
     `;

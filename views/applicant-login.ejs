@@ -11,7 +11,7 @@
     <div class="w-full max-w-sm px-6">
       <div class="mb-8 text-center">
         <h1 class="text-2xl font-semibold tracking-tight"><%= companyName %></h1>
-        <p class="mt-2 text-sm text-(--color-muted)">ATS &middot; Sign in to continue</p>
+        <p class="mt-2 text-sm text-(--color-muted)">Applicant Portal · Sign in</p>
       </div>
 
       <section class="rounded-2xl border border-(--color-border) bg-white p-6 shadow-sm">
@@ -19,14 +19,14 @@
           <p class="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"><%= error %></p>
         <% } %>
 
-        <form method="POST" action="/backoffice/login" class="grid gap-4">
+        <form method="POST" action="/applicant/login" class="grid gap-4">
           <label class="space-y-1">
-            <span class="block text-xs font-medium text-(--color-muted)">Username</span>
+            <span class="block text-xs font-medium text-(--color-muted)">Email</span>
             <input
-              name="username"
-              type="text"
+              name="email"
+              type="email"
               required
-              autocomplete="username"
+              autocomplete="email"
               class="w-full rounded-xl border border-(--color-border) bg-white px-3 py-2 text-sm outline-none transition focus:border-(--color-accent) focus:ring-2 focus:ring-(--color-accent-soft)"
             />
           </label>
@@ -49,6 +49,11 @@
             Sign in
           </button>
         </form>
+
+        <p class="mt-4 text-center text-sm text-(--color-muted)">
+          No account yet?
+          <a href="/applicant/signup" class="font-medium text-(--color-accent)">Create one</a>
+        </p>
       </section>
     </div>
   </body>

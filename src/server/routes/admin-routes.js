@@ -27,7 +27,7 @@ export async function handleGetAdminUsers(request) {
     title: `${appConfig.companyName} · User Management`,
     companyName: appConfig.companyName,
     companySubtitle: appConfig.companySubtitle,
-    currentPath: "/admin/users",
+    currentPath: "/backoffice/users",
     user,
     users,
     flashMessage,
@@ -46,22 +46,22 @@ export async function handlePostAdminCreateUser(request) {
     password = (formData.get("password") ?? "").toString();
     role = (formData.get("role") ?? "").toString().trim();
   } catch {
-    return new Response(null, { status: 302, headers: { Location: "/admin/users" } });
+    return new Response(null, { status: 302, headers: { Location: "/backoffice/users" } });
   }
 
   if (!username || !password || !["admin", "user"].includes(role)) {
-    return new Response(null, { status: 302, headers: { Location: "/admin/users" } });
+    return new Response(null, { status: 302, headers: { Location: "/backoffice/users" } });
   }
 
   const existing = await getUserByUsername(username);
   if (existing) {
-    return new Response(null, { status: 302, headers: { Location: "/admin/users?error=duplicate" } });
+    return new Response(null, { status: 302, headers: { Location: "/backoffice/users?error=duplicate" } });
   }
 
   const passwordHash = await Bun.password.hash(password);
   await createUser(username, passwordHash, role);
 
-  return new Response(null, { status: 302, headers: { Location: "/admin/users?flash=created" } });
+  return new Response(null, { status: 302, headers: { Location: "/backoffice/users?flash=created" } });
 }
 
 export async function handlePostAdminDeleteUser(request, userId) {
@@ -70,9 +70,9 @@ export async function handlePostAdminDeleteUser(request, userId) {
   const currentUser = authResult;
 
   if (currentUser.id === userId) {
-    return new Response(null, { status: 302, headers: { Location: "/admin/users?error=self-delete" } });
+    return new Response(null, { status: 302, headers: { Location: "/backoffice/users?error=self-delete" } });
   }
 
   await deleteUser(userId);
-  return new Response(null, { status: 302, headers: { Location: "/admin/users?flash=deleted" } });
+  return new Response(null, { status: 302, headers: { Location: "/backoffice/users?flash=deleted" } });
 }

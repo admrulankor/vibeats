@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= title %></title>
+    <link rel="stylesheet" href="/assets/css/styles.css" />
+    <link rel="stylesheet" href="/assets/css/style.css" />
+  </head>
+  <body class="min-h-screen bg-(--color-bg) text-(--color-text) antialiased">
+    <%- include('../partials/navbar') %>
+    <header class="mx-auto max-w-5xl px-6 py-10">
+      <div>
+        <a href="/backoffice/jobs" class="text-sm text-(--color-accent)">← Back to jobs</a>
+        <h1 class="mt-2 text-3xl font-semibold tracking-tight"><%= formMode === 'create' ? 'Create Job' : 'Edit Job' %></h1>
+      </div>
+    </header>
+
+    <main class="mx-auto max-w-5xl px-6 pb-12">
+      <% if (error) { %>
+        <p class="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"><%= error %></p>
+      <% } %>
+
+      <form id="job-form" method="POST" action="<%= formAction %>" class="grid gap-6">
+        <section class="rounded-2xl border border-(--color-border) bg-white p-5 shadow-sm grid gap-4">
+          <label class="space-y-1">
+            <span class="block text-xs font-medium text-(--color-muted)">Title</span>
+            <input name="title" type="text" required value="<%= job?.title || '' %>" class="w-full rounded-xl border border-(--color-border) bg-white px-3 py-2 text-sm" />
+          </label>
+
+          <label class="space-y-1">
+            <span class="block text-xs font-medium text-(--color-muted)">Intro</span>
+            <textarea name="intro" rows="3" class="w-full rounded-xl border border-(--color-border) bg-white px-3 py-2 text-sm"><%= job?.intro || '' %></textarea>
+          </label>
+
+          <label class="space-y-1">
+            <span class="block text-xs font-medium text-(--color-muted)">Required Qualifications</span>
+            <textarea name="requiredQualifications" rows="4" class="w-full rounded-xl border border-(--color-border) bg-white px-3 py-2 text-sm"><%= job?.requiredQualifications || '' %></textarea>
+          </label>
+
+          <label class="space-y-1">
+            <span class="block text-xs font-medium text-(--color-muted)">Recommended Qualifications</span>
+            <textarea name="recommendedQualifications" rows="4" class="w-full rounded-xl border border-(--color-border) bg-white px-3 py-2 text-sm"><%= job?.recommendedQualifications || '' %></textarea>
+          </label>
+
+          <label class="space-y-1">
+            <span class="block text-xs font-medium text-(--color-muted)">Description</span>
+            <textarea name="description" rows="6" class="w-full rounded-xl border border-(--color-border) bg-white px-3 py-2 text-sm"><%= job?.description || '' %></textarea>
+          </label>
+
+          <div class="grid gap-3 sm:grid-cols-3">
+            <label class="space-y-1">
+              <span class="block text-xs font-medium text-(--color-muted)">Employment Type</span>
+              <input name="employmentType" type="text" value="<%= job?.employmentType || '' %>" class="w-full rounded-xl border border-(--color-border) bg-white px-3 py-2 text-sm" />
+            </label>
+
+            <label class="space-y-1">
+              <span class="block text-xs font-medium text-(--color-muted)">Location</span>
+              <input name="location" type="text" value="<%= job?.location || '' %>" class="w-full rounded-xl border border-(--color-border) bg-white px-3 py-2 text-sm" />
+            </label>
+
+            <label class="space-y-1">
+              <span class="block text-xs font-medium text-(--color-muted)">Status</span>
+              <select name="status" class="w-full rounded-xl border border-(--color-border) bg-white px-3 py-2 text-sm">
+                <% ['draft', 'published', 'closed'].forEach(function(status) { %>
+                  <option value="<%= status %>" <%= (job?.status || 'draft') === status ? 'selected' : '' %>><%= status %></option>
+                <% }) %>
+              </select>
+            </label>
+          </div>
+        </section>
+
+        <section class="rounded-2xl border border-(--color-border) bg-white p-5 shadow-sm">
+          <div class="flex items-center justify-between gap-3">
+            <h2 class="text-sm font-medium uppercase tracking-wide text-(--color-muted)">Application Questions</h2>
+            <button id="add-question" type="button" class="rounded-xl border border-(--color-border) px-3 py-1.5 text-xs font-medium">Add question</button>
+          </div>
+          <div id="questions" class="mt-4 grid gap-3">
+            <% questions.forEach(function(question, index) { %>
+              <div class="rounded-xl border border-(--color-border) p-3 question-row" data-index="<%= index %>">
+                <label class="space-y-1 block">
+                  <span class="block text-xs font-medium text-(--color-muted)">Prompt</span>
+                  <input name="question_prompt" type="text" value="<%= question.prompt %>" class="w-full rounded-xl border border-(--color-border) bg-white px-3 py-2 text-sm" />
+                </label>
+                <div class="mt-3 grid gap-3 sm:grid-cols-3">
+                  <label class="space-y-1">
+                    <span class="block text-xs font-medium text-(--color-muted)">Input Type</span>
+                    <select name="question_input_type" class="w-full rounded-xl border border-(--color-border) bg-white px-3 py-2 text-sm">
+                      <% ['text', 'textarea', 'number', 'boolean'].forEach(function(type) { %>
+                        <option value="<%= type %>" <%= question.inputType === type ? 'selected' : '' %>><%= type %></option>
+                      <% }) %>
+                    </select>
+                  </label>
+                  <label class="space-y-1 flex items-end gap-2">
+                    <input type="checkbox" name="question_required" value="<%= index %>" <%= question.isRequired ? 'checked' : '' %> />
+                    <span class="text-sm">Required</span>
+                  </label>
+                  <div class="flex items-end justify-end">
+                    <button type="button" class="remove-question rounded-xl border border-red-200 px-3 py-1.5 text-xs font-medium text-red-600">Remove</button>
+                  </div>
+                </div>
+              </div>
+            <% }) %>
+          </div>
+        </section>
+
+        <div>
+          <button type="submit" class="inline-flex items-center rounded-xl bg-(--color-accent) px-4 py-2 text-sm font-medium text-white">Save Job</button>
+        </div>
+      </form>
+    </main>
+
+    <template id="question-template">
+      <div class="rounded-xl border border-(--color-border) p-3 question-row" data-index="0">
+        <label class="space-y-1 block">
+          <span class="block text-xs font-medium text-(--color-muted)">Prompt</span>
+          <input name="question_prompt" type="text" class="w-full rounded-xl border border-(--color-border) bg-white px-3 py-2 text-sm" />
+        </label>
+        <div class="mt-3 grid gap-3 sm:grid-cols-3">
+          <label class="space-y-1">
+            <span class="block text-xs font-medium text-(--color-muted)">Input Type</span>
+            <select name="question_input_type" class="w-full rounded-xl border border-(--color-border) bg-white px-3 py-2 text-sm">
+              <option value="text">text</option>
+              <option value="textarea">textarea</option>
+              <option value="number">number</option>
+              <option value="boolean">boolean</option>
+            </select>
+          </label>
+          <label class="space-y-1 flex items-end gap-2">
+            <input type="checkbox" name="question_required" value="0" />
+            <span class="text-sm">Required</span>
+          </label>
+          <div class="flex items-end justify-end">
+            <button type="button" class="remove-question rounded-xl border border-red-200 px-3 py-1.5 text-xs font-medium text-red-600">Remove</button>
+          </div>
+        </div>
+      </div>
+    </template>
+
+    <script>
+      (() => {
+        const questions = document.getElementById("questions");
+        const template = document.getElementById("question-template");
+        const addButton = document.getElementById("add-question");
+
+        function updateRequiredValues() {
+          const rows = questions.querySelectorAll(".question-row");
+          rows.forEach((row, index) => {
+            const required = row.querySelector('input[name="question_required"]');
+            if (required) required.value = String(index);
+          });
+        }
+
+        addButton.addEventListener("click", () => {
+          const node = template.content.cloneNode(true);
+          questions.appendChild(node);
+          updateRequiredValues();
+        });
+
+        questions.addEventListener("click", (event) => {
+          const target = event.target;
+          if (!(target instanceof Element)) return;
+          if (!target.classList.contains("remove-question")) return;
+
+          const row = target.closest(".question-row");
+          if (row) row.remove();
+          updateRequiredValues();
+        });
+
+        updateRequiredValues();
+      })();
+    </script>
+  </body>
+</html>

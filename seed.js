@@ -1,9 +1,11 @@
 import { sql } from "./db.js";
 import { APPLICATION_STATUSES } from "./src/shared/application-statuses.js";
-import { ensureAuthTables } from "./src/server/db/migrations.js";
+import { ensureApplicantAuthTables, ensureAuthTables, ensureJobBoardTables } from "./src/server/db/migrations.js";
 
 async function seed() {
   await ensureAuthTables();
+  await ensureApplicantAuthTables();
+  await ensureJobBoardTables();
 
   // Bootstrap initial admin account from env vars (idempotent)
   const adminUsername = Bun.env.ADMIN_USERNAME?.trim();

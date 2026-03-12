@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= title %></title>
+    <link rel="stylesheet" href="/assets/css/styles.css" />
+    <link rel="stylesheet" href="/assets/css/style.css" />
+  </head>
+  <body class="min-h-screen bg-(--color-bg) text-(--color-text) antialiased">
+    <%- include('../partials/navbar') %>
+    <header class="mx-auto max-w-5xl px-6 py-10">
+      <h1 class="text-3xl font-semibold tracking-tight">Applications</h1>
+      <p class="mt-2 text-sm text-(--color-muted)"><%= companyName %> · Review incoming job applications</p>
+    </header>
+
+    <main class="mx-auto max-w-5xl px-6 pb-12">
+      <section class="rounded-2xl border border-(--color-border) bg-white p-5 shadow-sm">
+        <% if (!applications.length) { %>
+          <p class="text-sm text-(--color-muted)">No applications submitted yet.</p>
+        <% } else { %>
+          <ul class="divide-y divide-(--color-border)">
+            <% applications.forEach(function(application) { %>
+              <li class="py-4 flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <h2 class="text-base font-semibold"><%= application.job_title %></h2>
+                  <p class="mt-1 text-sm text-(--color-muted)"><%= application.applicant_name %> · <%= application.applicant_email %></p>
+                  <p class="mt-1 text-xs text-(--color-muted)">Submitted <%= new Date(application.created_at).toLocaleString() %></p>
+                </div>
+                <div class="flex items-center gap-3">
+                  <span class="rounded-full bg-(--color-chip-bg) px-2.5 py-1 text-xs font-medium text-(--color-chip-text)"><%= application.status %></span>
+                  <a href="/backoffice/applications/<%= application.id %>" class="text-sm font-medium text-(--color-accent)">Open</a>
+                </div>
+              </li>
+            <% }) %>
+          </ul>
+        <% } %>
+      </section>
+    </main>
+  </body>
+</html>

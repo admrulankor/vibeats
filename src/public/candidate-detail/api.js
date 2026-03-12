@@ -9,7 +9,7 @@ export async function fetchCandidate() {
   clearError();
 
   try {
-    const response = await fetch(`/api/candidates/${candidateId}`);
+    const response = await fetch(`/backoffice/api/candidates/${candidateId}`);
 
     if (!response.ok) {
       throw new Error("Could not load candidate details.");
@@ -27,7 +27,7 @@ export async function extractCandidateData() {
   clearError();
 
   try {
-    const response = await fetch(`/api/candidates/${candidateId}/extract`, {
+    const response = await fetch(`/backoffice/api/candidates/${candidateId}/extract`, {
       method: "POST"
     });
 
@@ -70,7 +70,7 @@ export async function saveExtractedData() {
       awards
     };
 
-    const response = await fetch(`/api/candidates/${candidateId}/extracted-data`, {
+    const response = await fetch(`/backoffice/api/candidates/${candidateId}/extracted-data`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json"

@@ -36,7 +36,7 @@ function createCard(candidate) {
     <p class="mt-2 text-xs text-(--color-muted)">CV extraction: ${candidate.extraction_status || "idle"}</p>
     <p class="mt-2 wrap-break-word text-sm leading-relaxed">${candidate.notes || "No notes yet."}</p>
     <div class="mt-3 flex flex-wrap items-center justify-between gap-2">
-      <a href="/candidates/${candidate.id}" class="text-sm font-medium text-(--color-accent)">Open details</a>
+      <a href="/backoffice/candidates/${candidate.id}" class="text-sm font-medium text-(--color-accent)">Open details</a>
       <span class="text-xs text-(--color-muted)">${formatDate(candidate.created_at)}</span>
     </div>
     <label class="mt-3 block space-y-1">

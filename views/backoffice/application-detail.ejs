@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= title %></title>
+    <link rel="stylesheet" href="/assets/css/styles.css" />
+    <link rel="stylesheet" href="/assets/css/style.css" />
+  </head>
+  <body class="min-h-screen bg-(--color-bg) text-(--color-text) antialiased">
+    <%- include('../partials/navbar') %>
+    <header class="mx-auto max-w-5xl px-6 py-10">
+      <div>
+        <a href="/backoffice/applications" class="text-sm text-(--color-accent)">← Back to applications</a>
+        <h1 class="mt-2 text-3xl font-semibold tracking-tight">Application #<%= application.id %></h1>
+        <p class="mt-2 text-sm text-(--color-muted)"><%= application.job_title %> · <%= application.applicant_name %> (<%= application.applicant_email %>)</p>
+      </div>
+    </header>
+
+    <main class="mx-auto max-w-5xl px-6 pb-12 grid gap-6">
+      <section class="rounded-2xl border border-(--color-border) bg-white p-5 shadow-sm">
+        <h2 class="text-sm font-medium uppercase tracking-wide text-(--color-muted)">Status</h2>
+        <div class="mt-3 flex flex-wrap items-center gap-3">
+          <span class="rounded-full bg-(--color-chip-bg) px-2.5 py-1 text-xs font-medium text-(--color-chip-text)"><%= application.status %></span>
+          <form method="POST" action="/backoffice/applications/<%= application.id %>/status" class="flex flex-wrap items-center gap-2">
+            <select name="status" class="rounded-xl border border-(--color-border) bg-white px-3 py-2 text-sm">
+              <% statuses.forEach(function(status) { %>
+                <option value="<%= status %>" <%= application.status === status ? 'selected' : '' %>><%= status %></option>
+              <% }) %>
+            </select>
+            <button type="submit" class="rounded-xl bg-(--color-accent) px-4 py-2 text-sm font-medium text-white">Update status</button>
+          </form>
+        </div>
+      </section>
+
+      <section class="rounded-2xl border border-(--color-border) bg-white p-5 shadow-sm">
+        <h2 class="text-sm font-medium uppercase tracking-wide text-(--color-muted)">Applicant Details</h2>
+        <p class="mt-3 text-sm"><strong>Name:</strong> <%= application.applicant_name %></p>
+        <p class="mt-1 text-sm"><strong>Email:</strong> <%= application.applicant_email %></p>
+        <% if (application.applicant_phone) { %>
+          <p class="mt-1 text-sm"><strong>Phone:</strong> <%= application.applicant_phone %></p>
+        <% } %>
+        <% if (application.applicant_location) { %>
+          <p class="mt-1 text-sm"><strong>Location:</strong> <%= application.applicant_location %></p>
+        <% } %>
+        <% if (application.candidate_id) { %>
+          <p class="mt-3"><a href="/backoffice/candidates/<%= application.candidate_id %>" class="text-sm font-medium text-(--color-accent)">Open ATS Candidate Record</a></p>
+        <% } %>
+      </section>
+
+      <section class="rounded-2xl border border-(--color-border) bg-white p-5 shadow-sm">
+        <h2 class="text-sm font-medium uppercase tracking-wide text-(--color-muted)">Answers</h2>
+        <% if (!answers.length) { %>
+          <p class="mt-3 text-sm text-(--color-muted)">No custom answers submitted.</p>
+        <% } else { %>
+          <ul class="mt-3 grid gap-3">
+            <% answers.forEach(function(answer) { %>
+              <li class="rounded-xl border border-(--color-border) p-3">
+                <p class="text-sm font-medium"><%= answer.prompt %></p>
+                <p class="mt-1 text-sm text-(--color-muted)"><%= answer.answer_text || 'No answer' %></p>
+              </li>
+            <% }) %>
+          </ul>
+        <% } %>
+      </section>
+
+      <section class="rounded-2xl border border-(--color-border) bg-white p-5 shadow-sm">
+        <h2 class="text-sm font-medium uppercase tracking-wide text-(--color-muted)">Timeline</h2>
+        <% if (!timeline.length) { %>
+          <p class="mt-3 text-sm text-(--color-muted)">No status events yet.</p>
+        <% } else { %>
+          <ul class="mt-3 grid gap-2">
+            <% timeline.forEach(function(event) { %>
+              <li class="rounded-lg border border-(--color-border) px-3 py-2 text-sm">
+                <span class="font-medium"><%= event.to_status %></span>
+                <span class="text-(--color-muted)"> · <%= new Date(event.created_at).toLocaleString() %></span>
+              </li>
+            <% }) %>
+          </ul>
+        <% } %>
+      </section>
+    </main>
+  </body>
+</html>

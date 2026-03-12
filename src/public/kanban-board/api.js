@@ -15,7 +15,7 @@ export async function fetchCandidates() {
   elements.loading.classList.remove("hidden");
 
   try {
-    const response = await fetch("/api/candidates");
+    const response = await fetch("/backoffice/api/candidates");
 
     if (!response.ok) {
       throw new Error("Could not load candidates.");
@@ -31,7 +31,7 @@ export async function fetchCandidates() {
 }
 
 export async function persistCandidateStatus(candidateId, status) {
-  const response = await fetch(`/api/candidates/${candidateId}/status`, {
+  const response = await fetch(`/backoffice/api/candidates/${candidateId}/status`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json"

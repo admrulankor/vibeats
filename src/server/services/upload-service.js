@@ -26,43 +26,55 @@ function getStringFormField(formData, key) {
   return typeof value === "string" ? value.trim() : "";
 }
 
-export async function handleUploadScan(request) {
+export function validatePdfMetadata(filename, mimeType) {
+  const isPdfMime = mimeType === "application/pdf";
+  const isPdfName = /\.pdf$/i.test(filename || "");
+
+  if (!isPdfMime && !isPdfName) {
+    throw new Error("Only PDF files are supported.");
+  }
+}
+
+export async function storeUploadedCvFile(cvFile) {
+  if (!(cvFile instanceof File)) {
+    throw new Error("A CV PDF file is required.");
+  }
+
+  const originalname = cvFile.name || "cv.pdf";
+  validatePdfMetadata(originalname, cvFile.type);
+
+  if (cvFile.size > maxUploadBytes) {
+    throw new Error("File is too large. Maximum allowed size is 8MB.");
+  }
+
+  fs.mkdirSync(directories.uploads, { recursive: true });
+
+  const filename = sanitizeUploadFilename(originalname);
+  const filePath = path.join(directories.uploads, filename);
+  const buffer = Buffer.from(await cvFile.arrayBuffer());
+
+  await Bun.write(filePath, buffer);
+
+  return {
+    filename,
+    filePath,
+    originalname,
+    buffer
+  };
+}
+
+export async function createCandidateFromCvPayload({
+  buffer,
+  originalname,
+  filename,
+  requestedStatus,
+  requestedRole,
+  requestedNotes
+}) {
   let parser;
-  let uploadedFilePath;
 
   try {
-    const formData = await request.formData();
-    const cv = formData.get("cv");
-
-    if (!(cv instanceof File)) {
-      return jsonResponse({ error: "A CV PDF file is required." }, 400);
-    }
-
-    const originalname = cv.name || "cv.pdf";
-    const isPdfMime = cv.type === "application/pdf";
-    const isPdfName = /\.pdf$/i.test(originalname);
-
-    if (!isPdfMime && !isPdfName) {
-      return jsonResponse({ error: "Only PDF files are supported." }, 400);
-    }
-
-    if (cv.size > maxUploadBytes) {
-      return jsonResponse({ error: "File is too large. Maximum allowed size is 8MB." }, 400);
-    }
-
-    fs.mkdirSync(directories.uploads, { recursive: true });
-
-    const filename = sanitizeUploadFilename(originalname);
-    const filePath = path.join(directories.uploads, filename);
-    const buffer = Buffer.from(await cv.arrayBuffer());
-
-    uploadedFilePath = filePath;
-    await Bun.write(filePath, buffer);
-
-    const requestedStatus = getStringFormField(formData, "status");
     const status = applicationStatuses.includes(requestedStatus) ? requestedStatus : "Applied";
-    const requestedRole = getStringFormField(formData, "role");
-    const requestedNotes = getStringFormField(formData, "notes");
 
     parser = new PDFParse({ data: buffer });
     const parsedPdf = await parser.getText();
@@ -128,6 +140,40 @@ export async function handleUploadScan(request) {
     `;
 
     const createdCandidate = await getCandidateById(inserted[0].id);
+    return createdCandidate;
+  } finally {
+    if (parser) {
+      try {
+        await parser.destroy();
+      } catch (_error) {
+      }
+    }
+  }
+}
+
+export async function handleUploadScan(request) {
+  let uploadedFilePath;
+
+  try {
+    const formData = await request.formData();
+    const cv = formData.get("cv");
+
+    const storedCv = await storeUploadedCvFile(cv);
+    uploadedFilePath = storedCv.filePath;
+
+    const requestedStatus = getStringFormField(formData, "status");
+    const requestedRole = getStringFormField(formData, "role");
+    const requestedNotes = getStringFormField(formData, "notes");
+
+    const createdCandidate = await createCandidateFromCvPayload({
+      buffer: storedCv.buffer,
+      originalname: storedCv.originalname,
+      filename: storedCv.filename,
+      requestedStatus,
+      requestedRole,
+      requestedNotes
+    });
+
     return jsonResponse(toCandidateDto(createdCandidate), 201);
   } catch (error) {
     console.error("Failed to upload and scan CV:", error);
@@ -141,12 +187,5 @@ export async function handleUploadScan(request) {
 
     const message = error instanceof Error ? error.message : "Unable to upload and scan CV.";
     return jsonResponse({ error: message }, 400);
-  } finally {
-    if (parser) {
-      try {
-        await parser.destroy();
-      } catch (_error) {
-      }
-    }
   }
 }

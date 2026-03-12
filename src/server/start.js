@@ -1,8 +1,9 @@
 import { autoExtractionIntervalMs, port } from "./config/app-config.js";
 import { ensureCandidateColumnsAndSync } from "./data/candidates-repository.js";
-import { ensureAuthTables } from "./db/migrations.js";
+import { ensureApplicantAuthTables, ensureAuthTables, ensureJobBoardTables } from "./db/migrations.js";
 import { countAdmins } from "./data/users-repository.js";
 import { deleteExpiredSessions } from "./auth/sessions-repository.js";
+import { deleteExpiredApplicantSessions } from "./auth/applicant-sessions-repository.js";
 import { runAutoExtractionPass } from "./services/extraction-service.js";
 import { jsonResponse } from "./utils/http.js";
 import { handleRequest } from "./router.js";
@@ -10,7 +11,10 @@ import { handleRequest } from "./router.js";
 export async function startServer() {
   try {
     await ensureAuthTables();
+    await ensureApplicantAuthTables();
+    await ensureJobBoardTables();
     await deleteExpiredSessions();
+    await deleteExpiredApplicantSessions();
 
     const adminCount = await countAdmins();
     if (adminCount === 0) {

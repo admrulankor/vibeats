@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= title %></title>
+    <link rel="stylesheet" href="/assets/css/styles.css" />
+    <link rel="stylesheet" href="/assets/css/style.css" />
+  </head>
+  <body class="min-h-screen bg-(--color-bg) text-(--color-text) antialiased">
+    <header class="mx-auto max-w-5xl px-6 py-10">
+      <div class="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h1 class="text-3xl font-semibold tracking-tight">My Page</h1>
+          <p class="mt-2 text-sm text-(--color-muted)"><%= companyName %> · Track your applications</p>
+        </div>
+        <form method="POST" action="/applicant/logout">
+          <button
+            type="submit"
+            class="inline-flex items-center rounded-xl border border-(--color-border) bg-white px-4 py-2 text-sm font-medium text-(--color-text)"
+          >
+            Sign out
+          </button>
+        </form>
+      </div>
+    </header>
+
+    <main class="mx-auto max-w-5xl px-6 pb-12">
+      <% if (flashMessage) { %>
+        <p class="mb-4 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700"><%= flashMessage %></p>
+      <% } %>
+
+      <section class="rounded-2xl border border-(--color-border) bg-white p-5 shadow-sm">
+        <h2 class="text-lg font-semibold">Welcome, <%= applicant.name %></h2>
+        <p class="mt-1 text-sm text-(--color-muted)"><%= applicant.email %></p>
+        <% if (applicant.location) { %>
+          <p class="mt-1 text-sm text-(--color-muted)">Location: <%= applicant.location %></p>
+        <% } %>
+        <% if (applicant.phone) { %>
+          <p class="mt-1 text-sm text-(--color-muted)">Phone: <%= applicant.phone %></p>
+        <% } %>
+      </section>
+
+      <section class="mt-6 rounded-2xl border border-(--color-border) bg-white p-5 shadow-sm">
+        <h2 class="text-sm font-medium uppercase tracking-wide text-(--color-muted)">Applications</h2>
+        <% if (!applications.length) { %>
+          <p class="mt-3 text-sm text-(--color-muted)">No applications yet. Browse available jobs to apply.</p>
+        <% } %>
+
+        <% applications.forEach(function(application) { %>
+          <article class="mt-4 rounded-xl border border-(--color-border) p-4">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <h3 class="text-base font-semibold"><%= application.job_title %></h3>
+              <span class="rounded-full bg-(--color-chip-bg) px-2.5 py-1 text-xs font-medium text-(--color-chip-text)"><%= application.status %></span>
+            </div>
+            <p class="mt-1 text-xs text-(--color-muted)">Submitted <%= new Date(application.created_at).toLocaleString() %></p>
+            <% if (application.notes) { %>
+              <p class="mt-2 text-sm text-(--color-muted)"><%= application.notes %></p>
+            <% } %>
+
+            <div class="mt-3">
+              <h4 class="text-xs font-medium uppercase tracking-wide text-(--color-muted)">Status Timeline</h4>
+              <% if (!application.timeline.length) { %>
+                <p class="mt-1 text-sm text-(--color-muted)">No timeline events yet.</p>
+              <% } else { %>
+                <ul class="mt-2 grid gap-2">
+                  <% application.timeline.forEach(function(event) { %>
+                    <li class="rounded-lg border border-(--color-border) px-3 py-2 text-sm">
+                      <span class="font-medium"><%= event.to_status %></span>
+                      <span class="text-(--color-muted)"> · <%= new Date(event.created_at).toLocaleString() %></span>
+                    </li>
+                  <% }) %>
+                </ul>
+              <% } %>
+            </div>
+          </article>
+        <% }) %>
+      </section>
+    </main>
+  </body>
+</html>

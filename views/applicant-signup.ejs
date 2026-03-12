@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= title %></title>
+    <link rel="stylesheet" href="/assets/css/styles.css" />
+    <link rel="stylesheet" href="/assets/css/style.css" />
+  </head>
+  <body class="min-h-screen bg-(--color-bg) text-(--color-text) antialiased flex items-center justify-center py-8">
+    <div class="w-full max-w-xl px-6">
+      <div class="mb-8 text-center">
+        <h1 class="text-2xl font-semibold tracking-tight"><%= companyName %></h1>
+        <p class="mt-2 text-sm text-(--color-muted)">Applicant Portal · Create account</p>
+      </div>
+
+      <section class="rounded-2xl border border-(--color-border) bg-white p-6 shadow-sm">
+        <% if (error) { %>
+          <p class="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"><%= error %></p>
+        <% } %>
+
+        <form method="POST" action="/applicant/signup" class="grid gap-4 sm:grid-cols-2">
+          <label class="space-y-1 sm:col-span-2">
+            <span class="block text-xs font-medium text-(--color-muted)">Full Name</span>
+            <input
+              name="name"
+              type="text"
+              required
+              autocomplete="name"
+              class="w-full rounded-xl border border-(--color-border) bg-white px-3 py-2 text-sm outline-none transition focus:border-(--color-accent) focus:ring-2 focus:ring-(--color-accent-soft)"
+            />
+          </label>
+
+          <label class="space-y-1 sm:col-span-2">
+            <span class="block text-xs font-medium text-(--color-muted)">Email</span>
+            <input
+              name="email"
+              type="email"
+              required
+              autocomplete="email"
+              class="w-full rounded-xl border border-(--color-border) bg-white px-3 py-2 text-sm outline-none transition focus:border-(--color-accent) focus:ring-2 focus:ring-(--color-accent-soft)"
+            />
+          </label>
+
+          <label class="space-y-1 sm:col-span-2">
+            <span class="block text-xs font-medium text-(--color-muted)">Password</span>
+            <input
+              name="password"
+              type="password"
+              required
+              autocomplete="new-password"
+              class="w-full rounded-xl border border-(--color-border) bg-white px-3 py-2 text-sm outline-none transition focus:border-(--color-accent) focus:ring-2 focus:ring-(--color-accent-soft)"
+            />
+          </label>
+
+          <label class="space-y-1">
+            <span class="block text-xs font-medium text-(--color-muted)">Phone</span>
+            <input
+              name="phone"
+              type="text"
+              autocomplete="tel"
+              class="w-full rounded-xl border border-(--color-border) bg-white px-3 py-2 text-sm outline-none transition focus:border-(--color-accent) focus:ring-2 focus:ring-(--color-accent-soft)"
+            />
+          </label>
+
+          <label class="space-y-1">
+            <span class="block text-xs font-medium text-(--color-muted)">Location</span>
+            <input
+              name="location"
+              type="text"
+              autocomplete="address-level2"
+              class="w-full rounded-xl border border-(--color-border) bg-white px-3 py-2 text-sm outline-none transition focus:border-(--color-accent) focus:ring-2 focus:ring-(--color-accent-soft)"
+            />
+          </label>
+
+          <div class="sm:col-span-2">
+            <button
+              type="submit"
+              class="w-full rounded-xl bg-(--color-accent) px-4 py-2 text-sm font-medium text-white"
+            >
+              Create account
+            </button>
+          </div>
+        </form>
+
+        <p class="mt-4 text-center text-sm text-(--color-muted)">
+          Already registered?
+          <a href="/applicant/login" class="font-medium text-(--color-accent)">Sign in</a>
+        </p>
+      </section>
+    </div>
+  </body>
+</html>

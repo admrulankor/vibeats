@@ -6,7 +6,7 @@ export async function fetchCandidates() {
   elements.error.classList.add("hidden");
 
   try {
-    const response = await fetch("/api/candidates");
+    const response = await fetch("/backoffice/api/candidates");
 
     if (!response.ok) {
       throw new Error("Request failed");

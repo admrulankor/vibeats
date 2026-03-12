@@ -64,6 +64,9 @@ bun run dev
 
 Open http://localhost:3000
 
+Root path redirects to the public job board at `http://localhost:3000/jobs`.
+ATS users can sign in at `http://localhost:3000/backoffice/login`.
+
 ## Applicant CV PDF API
 
 - Candidate records now include `cv_filename` and `cv_url` when a matching file exists in `assets/uploads`.
@@ -73,19 +76,19 @@ Open http://localhost:3000
 - List available applicants:
 
 ```bash
-GET /api/candidates/available
+GET /backoffice/api/candidates/available
 ```
 
 - Download CV PDF packet for available applicants:
 
 ```bash
-GET /api/candidates/available/cv.pdf
+GET /backoffice/api/candidates/available/cv.pdf
 ```
 
 Example download with curl:
 
 ```bash
-curl -L "http://localhost:3000/api/candidates/available/cv.pdf" -o available-applicants-cv.pdf
+curl -L "http://localhost:3000/backoffice/api/candidates/available/cv.pdf" -o available-applicants-cv.pdf
 ```
 
 ## CV Extraction API
@@ -93,7 +96,7 @@ curl -L "http://localhost:3000/api/candidates/available/cv.pdf" -o available-app
 - Add applicant page (upload and scan UI):
 
 ```bash
-GET /applicants/new
+GET /backoffice/applicants/new
 ```
 
 - CV extraction now runs automatically in the background when a candidate-matching PDF is detected in `assets/uploads`.
@@ -103,31 +106,31 @@ GET /applicants/new
 - Candidate detail page:
 
 ```bash
-GET /candidates/:id
+GET /backoffice/candidates/:id
 ```
 
 - Candidate details JSON:
 
 ```bash
-GET /api/candidates/:id
+GET /backoffice/api/candidates/:id
 ```
 
 - Trigger local CV extraction for a candidate PDF:
 
 ```bash
-POST /api/candidates/:id/extract
+POST /backoffice/api/candidates/:id/extract
 ```
 
 - Save edited extracted fields:
 
 ```bash
-PUT /api/candidates/:id/extracted-data
+PUT /backoffice/api/candidates/:id/extracted-data
 ```
 
 - Upload a new applicant CV PDF, scan it with heuristics, and create a candidate:
 
 ```bash
-POST /api/candidates/upload-scan
+POST /backoffice/api/candidates/upload-scan
 ```
 
 Multipart form fields:

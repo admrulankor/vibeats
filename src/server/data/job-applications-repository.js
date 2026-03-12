@@ -189,17 +189,34 @@ export async function getStatusEventsForApplications(applicationIds) {
     return [];
   }
 
-  return await sql`
-    SELECT
-      id,
-      job_application_id,
-      from_status,
-      to_status,
-      actor_user_id,
-      actor_applicant_id,
-      created_at
-    FROM job_application_status_events
-    WHERE job_application_id = ANY(${applicationIds}::int[])
-    ORDER BY created_at ASC, id ASC
-  `;
+  const events = [];
+
+  for (const applicationId of applicationIds) {
+    const rows = await sql`
+      SELECT
+        id,
+        job_application_id,
+        from_status,
+        to_status,
+        actor_user_id,
+        actor_applicant_id,
+        created_at
+      FROM job_application_status_events
+      WHERE job_application_id = ${applicationId}
+      ORDER BY created_at ASC, id ASC
+    `;
+
+    events.push(...rows);
+  }
+
+  events.sort((a, b) => {
+    const dateDiff = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+    if (dateDiff !== 0) {
+      return dateDiff;
+    }
+
+    return a.id - b.id;
+  });
+
+  return events;
 }

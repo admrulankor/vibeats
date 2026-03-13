@@ -42,7 +42,15 @@ Update `DATABASE_URL` in `.env` to match your local PostgreSQL instance.
 bun run seed
 ```
 
-This initializes tables and application statuses only. It does not insert sample candidates.
+This initializes schema and syncs application statuses only. It does not insert sample candidates.
+
+To fully wipe local database tables (including ATS users, applicant accounts, jobs, applications, and candidates), run:
+
+```bash
+bun run reset
+```
+
+Then run `bun run seed` again to recreate baseline schema/statuses.
 
 4. Build Tailwind CSS:
 

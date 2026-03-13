@@ -498,7 +498,7 @@ export async function handleRequest(request) {
     return new Response(null, {
       status: 302,
       headers: {
-        Location: `/backoffice/jobs/${createdJobId}`
+        Location: "/backoffice/jobs"
       }
     });
   }

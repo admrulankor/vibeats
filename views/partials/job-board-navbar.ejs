@@ -13,6 +13,14 @@
     </div>
 
     <div class="ats-navbar-user">
+      <label class="text-sm text-(--color-muted)">
+        <span class="sr-only">Theme</span>
+        <select class="theme-select" data-theme-select aria-label="Theme">
+          <option value="light">Light</option>
+          <option value="dark">Dark</option>
+          <option value="system">System</option>
+        </select>
+      </label>
       <% if (applicant) { %>
         <span class="text-sm text-(--color-muted)"><%= applicant.email %></span>
         <form method="POST" action="/applicant/logout">

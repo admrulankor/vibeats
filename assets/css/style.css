@@ -7,9 +7,57 @@
   --color-accent-soft: #c7d2fe;
   --color-chip-bg: #eef2ff;
   --color-chip-text: #3730a3;
+  --color-surface: #ffffff;
+  --color-surface-soft: #f8faff;
   --radius-md: 12px;
   --radius-lg: 16px;
   --radius-pill: 999px;
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  --color-bg: #0f1421;
+  --color-text: #e6ebff;
+  --color-muted: #96a3c6;
+  --color-border: #2a3652;
+  --color-accent: #7f8cff;
+  --color-accent-soft: #31406a;
+  --color-chip-bg: #213152;
+  --color-chip-text: #c9d8ff;
+  --color-surface: #141c2d;
+  --color-surface-soft: #1a243a;
+  --color-gray-50: #1e2940;
+  --color-gray-100: #263450;
+  --color-sky-100: #1f3558;
+  --color-sky-700: #b9d8ff;
+  --color-violet-100: #3a2b5d;
+  --color-violet-700: #d8c8ff;
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --color-bg: #0f1421;
+    --color-text: #e6ebff;
+    --color-muted: #96a3c6;
+    --color-border: #2a3652;
+    --color-accent: #7f8cff;
+    --color-accent-soft: #31406a;
+    --color-chip-bg: #213152;
+    --color-chip-text: #c9d8ff;
+    --color-surface: #141c2d;
+    --color-surface-soft: #1a243a;
+    --color-gray-50: #1e2940;
+    --color-gray-100: #263450;
+    --color-sky-100: #1f3558;
+    --color-sky-700: #b9d8ff;
+    --color-violet-100: #3a2b5d;
+    --color-violet-700: #d8c8ff;
+    color-scheme: dark;
+  }
 }
 
 * {
@@ -44,8 +92,8 @@ a:hover {
   position: sticky;
   top: 0;
   z-index: 20;
-  border-bottom: 1px solid color-mix(in oklab, var(--color-border) 88%, #ffffff);
-  background: color-mix(in oklab, var(--color-bg) 84%, #ffffff);
+  border-bottom: 1px solid color-mix(in oklab, var(--color-border) 88%, var(--color-surface));
+  background: color-mix(in oklab, var(--color-bg) 84%, var(--color-surface));
   backdrop-filter: blur(8px);
 }
 
@@ -101,7 +149,7 @@ a:hover {
 .ats-navbar-link.is-active {
   color: color-mix(in oklab, var(--color-accent) 88%, var(--color-text));
   border-color: color-mix(in oklab, var(--color-accent-soft) 55%, var(--color-border));
-  background: color-mix(in oklab, var(--color-accent-soft) 30%, #ffffff);
+  background: color-mix(in oklab, var(--color-accent-soft) 30%, var(--color-surface));
 }
 
 .ats-navbar-user {
@@ -110,6 +158,24 @@ a:hover {
   align-items: center;
   justify-content: flex-start;
   gap: 10px;
+}
+
+.theme-select {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-muted);
+  font-size: 13px;
+  font-weight: 500;
+  padding: 6px 28px 6px 10px;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 140ms ease, box-shadow 140ms ease;
+}
+
+.theme-select:focus {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 2px color-mix(in oklab, var(--color-accent-soft) 75%, transparent);
 }
 
 main > section,
@@ -208,7 +274,7 @@ main > section,
   width: 100%;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  background: #fff;
+  background: var(--color-surface);
   color: var(--color-text);
   padding: 10px 12px;
   font-size: 14px;
@@ -237,9 +303,9 @@ main > section,
 }
 
 .details-card {
-  border: 1px solid color-mix(in oklab, var(--color-border) 84%, #ffffff);
+  border: 1px solid color-mix(in oklab, var(--color-border) 84%, var(--color-surface));
   border-radius: var(--radius-md);
-  background: color-mix(in oklab, #ffffff 82%, var(--color-chip-bg));
+  background: color-mix(in oklab, var(--color-surface) 82%, var(--color-chip-bg));
   padding: 12px;
 }
 
@@ -278,10 +344,20 @@ main > section,
   margin: 0;
   border: 1px dashed var(--color-border);
   border-radius: var(--radius-md);
-  background: color-mix(in oklab, #ffffff 88%, var(--color-bg));
+  background: color-mix(in oklab, var(--color-surface) 88%, var(--color-bg));
   color: var(--color-muted);
   font-size: 13px;
   padding: 10px 12px;
+}
+
+:root[data-theme="dark"] .bg-white {
+  background-color: var(--color-surface);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .bg-white {
+    background-color: var(--color-surface);
+  }
 }
 
 .skills-list {

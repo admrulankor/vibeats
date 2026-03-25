@@ -19,6 +19,14 @@
     </div>
 
     <div class="ats-navbar-user">
+      <label class="text-sm text-(--color-muted)">
+        <span class="sr-only">Theme</span>
+        <select class="theme-select" data-theme-select aria-label="Theme">
+          <option value="light">Light</option>
+          <option value="dark">Dark</option>
+          <option value="system">System</option>
+        </select>
+      </label>
       <span class="text-sm text-(--color-muted)"><%= user.username %></span>
       <span class="rounded-full px-2 py-0.5 text-xs font-medium <%- user.role === 'admin' ? 'bg-violet-100 text-violet-700' : 'bg-sky-100 text-sky-700' %>"><%= user.role %></span>
       <form method="POST" action="/backoffice/logout">
